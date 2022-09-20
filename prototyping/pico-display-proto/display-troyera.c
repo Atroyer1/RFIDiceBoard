@@ -145,15 +145,27 @@ int main() {
         //colorNum = colorNum + 1;
         colorNum = ~colorNum;
 
-        for(int i = 1; i < WIDTH + 1; i++){
+        //This perfectly spans the x-direction (COLUMN direction)
+        for(int i = 1; i <= WIDTH; i++){
             drawPixelTest(i, 1, 1, 1, (uint16_t)colorNum);
             sleep_ms(1);
         }
 
-        for(int i = 1; i < HEIGHT + 1; i++){
-            drawPixelTest(1, i, 1, 1, (uint16_t)colorNum);
+        for(int i = 1; i <= HEIGHT; i++){
+            //drawPixelTest(1, i, 1, 1, (uint16_t)colorNum);
             sleep_ms(1);
         }
+
+        for(int i = HEIGHT + 1; i > 0; i--){
+            //drawPixelTest(i, HEIGHT, 1, 1, (uint16_t)~colorNum);
+            sleep_ms(1);
+        }
+
+        for(int i = WIDTH + 1; i > 0; i--){
+            //drawPixelTest(WIDTH, i, 1, 1, (uint16_t)~colorNum);
+            sleep_ms(1);
+        }
+
         //Color the entire screen, pixel by pixel
         /*
         for(int i = 0; i < WIDTH; i++){
