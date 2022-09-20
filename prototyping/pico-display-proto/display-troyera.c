@@ -98,6 +98,7 @@ static const uint8_t
 
 
 int main() {
+    uint16_t colorNum = 0;
     //bi_decl(bi_program_description("This is a test binary."));
     //bi_decl(bi_1pin_with_name(LED_PIN, "On-board LED"));
     stdio_init_all();
@@ -147,84 +148,20 @@ int main() {
     }*/
     //drawPixelTest(0, 0, (uint16_t)0xF800);
     
-    //Supposedly the display is ready to display shit
+    //Supposedly the display is ready to display
     while(1){
+        colorNum = colorNum + 1;
         for(int i = 0; i < WIDTH; i++){
             for(int j = 0; j < HEIGHT; j++){
-                drawPixelTest(i, j, 1, 1, (uint16_t)0x0000);
+                drawPixelTest(i, j, 1, 1, (uint16_t)colorNum);
             }
         }
-        sleep_ms(50);
+        sleep_ms(100);
         for(int i = 0; i < WIDTH; i++){
             for(int j = 0; j < HEIGHT; j++){
-                drawPixelTest(i, j, 1, 1, (uint16_t)0xFFFF);
+                drawPixelTest(i, j, 1, 1, (uint16_t)(~colorNum));
             }
         }
-        /*
-        displayInit(cmd1);
-        displayInit(cmd2);
-        displayInit(cmd3);
-        */
-        /*
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0050, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0051, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0052, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0053, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0054, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0055, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0056, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0057, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0058, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0059, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x005A, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x005b, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x005c, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x005d, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x005e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x005f, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0060, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0061, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0062, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0063, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0064, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0065, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0066, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0067, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0068, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x0069, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x006A, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x006b, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x006c, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x006d, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x006e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x003e, (int16_t)0x006f, 1, 1, (uint16_t)0x0000);
-
-        drawPixelTest((int16_t)0x0040, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0041, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0042, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0043, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0044, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0045, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0046, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0047, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0048, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x0049, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x004A, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x004b, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x004c, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x004d, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x004e, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        drawPixelTest((int16_t)0x004f, (int16_t)0x004e, 1, 1, (uint16_t)0x0000);
-        */
-        
-        //sleep_ms(1000);
-        //sendCommand(NOP, 0, 0);
-        //sendCommand(INVON, 0, 0);
-        //sleep_ms(1000);
-        //ledBlink(50, 50);
-        //sendCommand(INVOFF, 0, 0);
-        //sleep_ms(1000);
-        //drawPixelTest(20, 20, 0xF800);
     }
 }
 

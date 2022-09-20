@@ -9,3 +9,5 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+prototyping/pico-display-proto/build/
+*.swp
