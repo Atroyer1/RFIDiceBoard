@@ -99,6 +99,8 @@ static const uint8_t
 
 int main() {
     uint16_t colorNum = 0;
+    /****INITIALIZATION****************/
+    /*************************************************************************************/
     //bi_decl(bi_program_description("This is a test binary."));
     //bi_decl(bi_1pin_with_name(LED_PIN, "On-board LED"));
     stdio_init_all();
@@ -133,24 +135,27 @@ int main() {
     displayInit(cmd2);
     displayInit(cmd3);
 
-    //drawPixelTest(50, 50, 10, 10, 0xF800);
+    /****END_INITIALIZATION****************/
+    /*************************************************************************************/
   
-    /*  
-    for(int i = 0; i < WIDTH; i++){
-        for(int j = 0; j < HEIGHT; j++){
-            drawPixelTest(i, j, (uint16_t)0xF800);
-        }
-    }*/
-    
-    /*
-    for(int i = 0; i < 126; i++){
-        drawPixelTest(i, 20, (uint16_t)0xF800);
-    }*/
-    //drawPixelTest(0, 0, (uint16_t)0xF800);
     
     //Supposedly the display is ready to display
+    colorNum = 0xFFFF;
     while(1){
-        colorNum = colorNum + 1;
+        //colorNum = colorNum + 1;
+        colorNum = ~colorNum;
+
+        for(int i = 1; i < WIDTH + 1; i++){
+            drawPixelTest(i, 1, 1, 1, (uint16_t)colorNum);
+            sleep_ms(1);
+        }
+
+        for(int i = 1; i < HEIGHT + 1; i++){
+            drawPixelTest(1, i, 1, 1, (uint16_t)colorNum);
+            sleep_ms(1);
+        }
+        //Color the entire screen, pixel by pixel
+        /*
         for(int i = 0; i < WIDTH; i++){
             for(int j = 0; j < HEIGHT; j++){
                 drawPixelTest(i, j, 1, 1, (uint16_t)colorNum);
@@ -162,6 +167,7 @@ int main() {
                 drawPixelTest(i, j, 1, 1, (uint16_t)(~colorNum));
             }
         }
+        */
     }
 }
 
@@ -265,23 +271,17 @@ void rst_deselect(void) {
 }
 
 void drawPixelTest(int16_t x, int16_t y, int16_t h, int16_t w, uint16_t color){
-    //TODO make these arrays instead of uint32_t's just like you input them in sendCommand
-    uint32_t xa;
-    uint32_t ya;
+    //const uint8_t coords[] = {(uint32_t)x, (uint32_t)y};
+    uint16_t x1 = x - 1;
+    uint16_t y1 = y - 1;
     
-    //x += colstart;
-    //y += rowstart;
-    //xa = (((uint32_t)0x99 )<< 8) | ((x + w - 1)); 
-    //ya = (((uint32_t)0x99 )<< 8) | ((y + h - 1)); 
+    uint32_t xa = ((uint32_t)x1 << 24) | ((x1 + w - 1) << 8);
 
-    xa = ((uint32_t)x << 24) | ((x + w - 1) << 8);
-    //xa |= ((x + w - 1)); 
+    uint32_t ya = ((uint32_t)y1 << 24) | ((y1 + h - 1) << 8);
 
-    ya = ((uint32_t)y << 24) | ((y + h - 1) << 8);
-    //ya |= ((y + h - 1)); 
 
+    //Set the Colomn and row
     sendCommand((uint8_t)CASET, (uint8_t *)&xa, 4);
-
     sendCommand((uint8_t)RASET, (uint8_t *)&ya, 4);
 
     sendCommand((uint8_t)RAMWR, (uint8_t *)&color, 2);
