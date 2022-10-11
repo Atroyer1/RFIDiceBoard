@@ -5,9 +5,9 @@
 #include "pico/binary_info.h"
 #include "display-troyera.h"
 
-const uint8_t DC_PIN = 20;
+const uint8_t DC_PIN = 21;
 const uint8_t LED_PIN = 25;
-const uint8_t RS_PIN = 21;
+const uint8_t RS_PIN = 20;
 static uint8_t blCount = 0;
 const uint8_t colstart = 2;
 const uint8_t rowstart = 1;
@@ -99,6 +99,22 @@ static const uint8_t
 
 int main() {
     uint16_t colorNum = 0;
+    uint16_t cornerColor = 0x00FF;
+
+    uint16_t testVar;
+    uint32_t testVar2;
+
+    uint8_t testArray[] = {0, 54, 0, 54, 0, 70, 0, 74};
+    //uint8_t testArray[] = {54, 0, 55, 0, 70, 0, 71, 0};
+
+    uint8_t colorArray[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+                           };
+
+ 
+
     /****INITIALIZATION****************/
     /*************************************************************************************/
     //bi_decl(bi_program_description("This is a test binary."));
@@ -127,6 +143,7 @@ int main() {
     gpio_put(RS_PIN, 1);
 
     rst_select();
+    sleep_ms(1000);
     rst_deselect();
     
     sleep_ms(1000); //Sleeping for a sec just in case the display needs it.
@@ -140,16 +157,59 @@ int main() {
   
     
     //Supposedly the display is ready to display
+
+    for(int i = 1; i <= WIDTH; i++){
+        for(int j = 1; j <= HEIGHT; j++){
+            drawPixelTest(i, j, 1, 1, (uint16_t)0x0F0F);
+        }
+    }
+    drawPixelTest(50, 50, 1, 1, (uint16_t)0xFF00);
+
+    sendCommand((uint8_t)RASET, testArray, 4);
+    sendCommand((uint8_t)CASET, testArray + 4, 4);
+
+
+    sendCommand((uint8_t)RAMWR, colorArray, 32);
+    sendCommand((uint8_t)NOP, 0, 0);
+
+    while(1){//PAUSE
+    }
+
+
+    /*****************************************************************
+    testVar = 50;
+
+    testVar2 = ( ( ((uint32_t)testVar) << 24 ) | ( ((testVar)) << 8) );
+
+    //uint32_t ya = ((uint32_t)testVar << 24) | ((testVar + 2) << 8);
+
+
+    //Set the Colomn and row
+    sendCommand((uint8_t)CASET, (uint8_t *)&testVar2, 4);
+    sendCommand((uint8_t)RASET, (uint8_t *)&testVar2, 4);
+
+    testVar = 0xFFFF;
+
+    sendCommand((uint8_t)RAMWR, (uint8_t *)&testVar, 2);
+    sendCommand((uint8_t)NOP, 0, 0);
+
+    while(1){//PAUSE
+    }
+     ****************************************************************/
+
     colorNum = 0xFFFF;
     while(1){
         //colorNum = colorNum + 1;
         colorNum = ~colorNum;
+        cornerColor = (0xFF00 & (~cornerColor));
 
         //This perfectly spans the x-direction (COLUMN direction)
-        for(int i = 1; i <= WIDTH; i++){
+        drawPixelTest(1, 1, 2, 2, (uint16_t)cornerColor);
+        for(int i = 3; i <= WIDTH - 2; i++){
             drawPixelTest(i, 1, 1, 1, (uint16_t)colorNum);
             sleep_ms(1);
         }
+        drawPixelTest(WIDTH - 2, 1, 2, 2, (uint16_t)cornerColor);
 
         for(int i = 1; i <= HEIGHT; i++){
             //drawPixelTest(1, i, 1, 1, (uint16_t)colorNum);
@@ -166,8 +226,10 @@ int main() {
             sleep_ms(1);
         }
 
+
         //Color the entire screen, pixel by pixel
-        /*
+
+        /***********************************************************************
         for(int i = 0; i < WIDTH; i++){
             for(int j = 0; j < HEIGHT; j++){
                 drawPixelTest(i, j, 1, 1, (uint16_t)colorNum);
@@ -179,7 +241,8 @@ int main() {
                 drawPixelTest(i, j, 1, 1, (uint16_t)(~colorNum));
             }
         }
-        */
+
+        ***********************************************************************/
     }
 }
 
@@ -300,10 +363,4 @@ void drawPixelTest(int16_t x, int16_t y, int16_t h, int16_t w, uint16_t color){
     sendCommand((uint8_t)NOP, 0, 0);
     sleep_us(1);
 
-    //cs_select();
-    //spi_write_blocking(spi_default, (uint8_t *)&color, 2);
-    //cs_deselect();
-
-    //sendCommand((uint8_t)INVON, 0, 0);
-    //sendCommand((uint8_t)INVOFF, 0, 0);
 }

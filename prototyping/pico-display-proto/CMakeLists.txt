@@ -10,8 +10,8 @@ pico_sdk_init()
 add_executable(display-troyera
     display-troyera.c
 )
-pico_enable_stdio_usb(display-troyera 1)
-pico_enable_stdio_uart(display-troyera 0)
+pico_enable_stdio_usb(display-troyera 0)
+pico_enable_stdio_uart(display-troyera 1)
 
 pico_add_extra_outputs(display-troyera)
 

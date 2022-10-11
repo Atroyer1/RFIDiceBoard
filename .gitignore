@@ -10,5 +10,9 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 prototyping/pico-display-proto/build/
+troyermade/build
+*.cmake
 *.swp
 *.swo
+*.zip
+*fp-info-cache
