@@ -24,6 +24,7 @@ void rst_deselect(void);
 void ledBlink(uint16_t onTime, uint16_t offTime);
 void drawPixelTest(int16_t x, int16_t y, int16_t h, int16_t w, uint16_t color);
     
+void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16_t background);
 
 //Ok. This is gonna look like a mess but I'm just trying to get it to work by looking at how adafruit did it.
 
@@ -104,10 +105,10 @@ int main() {
     uint16_t testVar;
     uint32_t testVar2;
 
-    uint8_t testArray[] = {0, 54, 0, 54, 0, 70, 0, 74};
+    uint8_t testArray[] = {0, 0, 0, HEIGHT, 0, 0, 0, WIDTH};
     //uint8_t testArray[] = {54, 0, 55, 0, 70, 0, 71, 0};
 
-    uint8_t colorArray[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    uint8_t colorArray[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
                             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
@@ -160,20 +161,27 @@ int main() {
 
     for(int i = 1; i <= WIDTH; i++){
         for(int j = 1; j <= HEIGHT; j++){
-            drawPixelTest(i, j, 1, 1, (uint16_t)0x0F0F);
+            drawPixelTest(i, j, 1, 1, (uint16_t)0x0000);
         }
     }
+    /*************************************************************
     drawPixelTest(50, 50, 1, 1, (uint16_t)0xFF00);
 
+    //Row is the longways
     sendCommand((uint8_t)RASET, testArray, 4);
+    //Column is the shortways
     sendCommand((uint8_t)CASET, testArray + 4, 4);
 
+    //Have to send RAMWR with all the color data to draw a big 'ol rectangle
 
     sendCommand((uint8_t)RAMWR, colorArray, 32);
     sendCommand((uint8_t)NOP, 0, 0);
 
     while(1){//PAUSE
     }
+    *************************************************************/
+
+    drawLetterTest(l_A, 5, 5, 0xFFFF, 0x0F0F);
 
 
     /*****************************************************************
@@ -364,3 +372,69 @@ void drawPixelTest(int16_t x, int16_t y, int16_t h, int16_t w, uint16_t color){
     sleep_us(1);
 
 }
+
+
+void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16_t background){
+                      
+    uint8_t coords[] = {0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t curr_color[] = {0, 0};
+    uint16_t test_color = 0x07E0;
+    uint8_t pixel_counter = 0;
+    uint32_t pixel_flag; 
+    uint8_t x_pos = 0;
+    uint8_t y_pos = 0;
+
+    if(letter || 0x4000){ //If the letter has the 12 pixel flag set
+        pixel_counter = 0;
+        //I need to figure out if the pixel at the current coordinate is color or background
+        //I then need to swap to the next pixel
+        //Then! I need to do that twice more
+        //THen!!! I need to switch to the next row.
+        
+        //Hrm. Should I organize the bits differently? idk.
+        //So now l_letter at the lsb is the current pixel
+
+        while(pixel_counter <= 11){
+            coords[1] = y + y_pos;
+            coords[3] = y + y_pos;
+            coords[5] = (x + x_pos);
+            coords[7] = (x + x_pos);
+
+            //Column is the shortways
+            sendCommand((uint8_t)CASET, (coords + 4), 4);
+            //Row is the longways
+            sendCommand((uint8_t)RASET, (coords), 4);
+
+            //Is the pixel On or Off
+            if((((letter >> (11 - pixel_counter)) & 0x1)) == 0x1){
+               test_color = 0xFFFF;
+            }else{
+               test_color = 0x0000;
+            } 
+            sendCommand((uint8_t)RAMWR, (const uint8_t *)&test_color, 2);
+            sendCommand((uint8_t)NOP, 0, 0);
+
+            //Time to decide the location of the next pixel
+            if((pixel_counter % 3) == 2){
+                x_pos = 0; 
+            }else{
+                x_pos++;
+            }
+
+            if((x_pos == 0) && (pixel_counter != 0)){
+                y_pos++;
+            }else{}
+
+            pixel_counter ++;
+        }
+    }else if(letter || 0x8000){ //If the letter has the 16 pixel flag set
+
+    }else if(letter || 0xA000){ //If the letter has the 20 pixel flag set
+
+    }
+
+}
+
+
+
+
