@@ -24,7 +24,7 @@ void rst_deselect(void);
 void ledBlink(uint16_t onTime, uint16_t offTime);
 void drawPixelTest(int16_t x, int16_t y, int16_t h, int16_t w, uint16_t color);
     
-void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16_t background);
+void drawLetterTest(uint32_t letter, int16_t x, int16_t y, uint16_t color, uint16_t background);
 
 //Ok. This is gonna look like a mess but I'm just trying to get it to work by looking at how adafruit did it.
 
@@ -181,7 +181,43 @@ int main() {
     }
     *************************************************************/
 
-    drawLetterTest(l_A, 5, 5, 0xFFFF, 0x0F0F);
+    drawLetterTest(l_A, 5, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_B, 11, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_C, 17, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_D, 23, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_E, 29, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_F, 35, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_G, 41, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_H, 47, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_I, 55, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_J, 61, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_K, 67, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_L, 73, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_M, 79, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_N, 85, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_O, 91, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_P, 97, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_Q, 105, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_R, 111, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_S, 117, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_T, 123, 5, 0xFFFF, 0x0000);
+    drawLetterTest(l_U, 5, 11, 0xFFFF, 0x0000);
+    drawLetterTest(l_V, 11, 11, 0xFFFF, 0x0000);
+    drawLetterTest(l_W, 17, 11, 0xFFFF, 0x0000);
+    drawLetterTest(l_X, 23, 11, 0xFFFF, 0x0000);
+    drawLetterTest(l_Y, 29, 11, 0xFFFF, 0x0000);
+    drawLetterTest(l_Z, 35, 11, 0xFFFF, 0x0000);
+
+    drawLetterTest(l_0, 5, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_1, 11, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_2, 17, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_3, 23, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_4, 29, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_5, 35, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_6, 41, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_7, 47, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_8, 55, 17, 0xFFFF, 0x0000);
+    drawLetterTest(l_9, 61, 17, 0xFFFF, 0x0000);
 
 
     /*****************************************************************
@@ -373,7 +409,49 @@ void drawPixelTest(int16_t x, int16_t y, int16_t h, int16_t w, uint16_t color){
 
 }
 
+void drawLetterTest(uint32_t letter, int16_t x, int16_t y, uint16_t color, uint16_t background){
+    uint32_t l_letter = letter;
+    uint8_t coords[] = {0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t pixel_counter = 0;
+    uint8_t x_pos = 0;
+    uint8_t y_pos = 0;
+    
+    //So in this version all letters are 5x5 pixels
+    while(pixel_counter <= 24){
+        //Set the coordinates and send the information for the first pixel
+        coords[1] = y + y_pos;
+        coords[3] = y + y_pos;
+        coords[5] = (x + x_pos);
+        coords[7] = (x + x_pos);
 
+        //Column is the shortways
+        sendCommand((uint8_t)CASET, (coords + 4), 4);
+        //Row is the longways
+        sendCommand((uint8_t)RASET, (coords), 4);
+
+        //Adjust for the color
+        if((((l_letter >> (24 - pixel_counter)) & 0x1)) == 0x1){
+            sendCommand((uint8_t)RAMWR, (const uint8_t *)&color, 2);
+            sendCommand((uint8_t)NOP, 0, 0);
+        }else{
+            sendCommand((uint8_t)RAMWR, (const uint8_t *)&background, 2);
+            sendCommand((uint8_t)NOP, 0, 0);
+        }
+
+        if((pixel_counter % 5) == 4){
+            x_pos = 0; 
+        }else{
+            x_pos++;
+        }
+
+        if((x_pos == 0) && (pixel_counter != 0)){
+            y_pos++;
+        }else{}
+
+        pixel_counter ++;
+    }
+}
+/*
 void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16_t background){
                       
     uint8_t coords[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -386,6 +464,7 @@ void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16
 
     if(letter || 0x4000){ //If the letter has the 12 pixel flag set
         pixel_counter = 0;
+        letter &= ~0x4000;
         //I need to figure out if the pixel at the current coordinate is color or background
         //I then need to swap to the next pixel
         //Then! I need to do that twice more
@@ -394,7 +473,7 @@ void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16
         //Hrm. Should I organize the bits differently? idk.
         //So now l_letter at the lsb is the current pixel
 
-        while(pixel_counter <= 11){
+        while(pixel_counter <= 14){
             coords[1] = y + y_pos;
             coords[3] = y + y_pos;
             coords[5] = (x + x_pos);
@@ -406,7 +485,7 @@ void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16
             sendCommand((uint8_t)RASET, (coords), 4);
 
             //Is the pixel On or Off
-            if((((letter >> (11 - pixel_counter)) & 0x1)) == 0x1){
+            if(((((letter) >> (14 - pixel_counter)) & 0x1)) == 0x1){
                test_color = 0xFFFF;
             }else{
                test_color = 0x0000;
@@ -434,6 +513,7 @@ void drawLetterTest(int32_t letter, int16_t x, int16_t y, uint16_t color, uint16
     }
 
 }
+*/
 
 
 
