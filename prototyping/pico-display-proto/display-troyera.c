@@ -30,6 +30,66 @@ void drawLetterTest(uint32_t letter, int16_t x, int16_t y, uint16_t color, uint1
 
 
 static const uint8_t 
+    cmd[] = {
+    21,
+    SWRESET, ST_CMD_DELAY,
+    150,
+    SLPOUT, ST_CMD_DELAY,
+    255,
+    FRMCTR1, 3,
+    0x01, 0x2C, 0x2D,
+    FRMCTR2, 3,
+    0x01, 0x2C, 0x2D,
+    FRMCTR3, 6,
+    0x01, 0x2C, 0x2D,
+    0x01, 0x2C, 0x2D,
+    INVCTR, 1,
+    0x07,
+    PWCTR1, 3,
+    0xA2,
+    0x02,
+    0x84,
+    PWCTR2, 1,
+    0xC5,
+    PWCTR3, 2,
+    0x0A,
+    0x00,
+    PWCTR4, 2,
+    0x8A,
+    0x2A,
+    PWCTR5, 2,
+    0x8A, 0xEE,
+    VMCTR1, 1,
+    0x0E,    
+    INVOFF, 0,
+    MADCTL, 1,
+    0xC8,
+    COLMOD, 1,
+    0x05,
+    CASET, 4,
+    0x00, 0x00,
+    0x00, 0x7F,
+    RASET, 4,
+    0x00, 0x00,
+    0x00, 0x7F,
+    GMCTRP1, 16,
+    0x02, 0x1c, 0x07, 0x12,
+    0x37, 0x32, 0x29, 0x2d,
+    0x29, 0x25, 0x2B, 0x39,
+    0x00, 0x01, 0x03, 0x10,
+    GMCTRN1, 16,
+    0x03, 0x1d, 0x07, 0x06,
+    0x2E, 0x2C, 0x29, 0x2D,
+    0x2E, 0x2E, 0x37, 0x3F,
+    0x00, 0x00, 0x02, 0x10,
+    NORON, ST_CMD_DELAY,
+    10,
+    DISPON, ST_CMD_DELAY,
+    100
+};
+
+/*
+static const uint8_t 
     cmd1[] = {
     15,                         //15 commands in this initialization
     SWRESET, ST_CMD_DELAY,
@@ -93,6 +153,7 @@ static const uint8_t
     DISPON, ST_CMD_DELAY,
     100
 };
+*/
 
 
 
@@ -149,9 +210,17 @@ int main() {
     
     sleep_ms(1000); //Sleeping for a sec just in case the display needs it.
                     //unsure if this is necessary
+    while(1){
+        displayInit(cmd);
+    }
+
+    //displayInit(cmd);
+
+    /*
     displayInit(cmd1);
     displayInit(cmd2);
     displayInit(cmd3);
+    */
 
     /****END_INITIALIZATION****************/
     /*************************************************************************************/

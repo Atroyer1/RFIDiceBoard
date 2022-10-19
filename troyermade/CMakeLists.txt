@@ -7,8 +7,14 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
-add_executable(main
+add_executable(RFIDiceBoard
   main.c
+  tftdisplay.c
 )
 
-target_link_libraries(main pico_stdlib)
+target_link_libraries(
+    RFIDiceBoard 
+    pico_stdlib
+    hardware_spi
+)
+
