@@ -13,6 +13,7 @@ const uint8_t colstart = 2;
 const uint8_t rowstart = 1;
 
 
+
 void displayInit(const uint8_t *addr);
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes);
 void cs_select(void);
@@ -210,11 +211,8 @@ int main() {
     
     sleep_ms(1000); //Sleeping for a sec just in case the display needs it.
                     //unsure if this is necessary
-    while(1){
-        displayInit(cmd);
-    }
 
-    //displayInit(cmd);
+    displayInit(cmd);
 
     /*
     displayInit(cmd1);

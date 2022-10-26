@@ -1,6 +1,10 @@
 //public functions
 
 void tft_init(void);
+void drawPixel(uint8_t x, uint8_t y, uint16_t color);
+void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
+void drawBackground(uint16_t color);
+
 
 
 //Predefined pins

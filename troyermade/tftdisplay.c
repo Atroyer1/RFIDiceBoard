@@ -106,11 +106,9 @@ void tft_init(void){
     gpio_set_dir(RS_PIN, GPIO_OUT);
     gpio_put(RS_PIN, 1);
 
-
     rst_select();
     sleep_ms(1000);
     rst_deselect();
-    sleep_ms(1000);
     //Initialization for display commands loop
 
     numCommands = l_addr[0];
@@ -135,24 +133,9 @@ void tft_init(void){
         }
         numCommands--;
     }
-    
-    /************************************************************************************/
-    //Testing if I need to send something to the display to have it actually start up!
-    /************************************************************************************/
-
-    /*
-    sendCommand((uint8_t)RASET, 0x00010001, 4);
-    sendCommand((uint8_t)CASET, 0x00010001, 4);
-
-    sendCommand((uint8_t)RAMWR, 0x0000, 32);
-    sendCommand((uint8_t)NOP, 0, 0);
-    */
-
-    /************************************************************************************/
-    /************************************************************************************/
-
 }
 
+//self-contained spi-write
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes){
     cs_select();
 
@@ -166,6 +149,87 @@ void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes
     cs_deselect();
 }
 
+void drawPixel(uint8_t x, uint8_t y, uint16_t color){
+    uint8_t x_coords[] = {0, x, 0, x};
+    uint8_t y_coords[] = {0, y, 0, y};
+
+    sendCommand((uint8_t)CASET, x_coords, 4);
+    sendCommand((uint8_t)RASET, y_coords, 4);
+
+    sendCommand((uint8_t)RAMWR, (uint8_t *)&color, 2);
+    sendCommand((uint8_t)NOP, 0, 0);
+}
+
+void drawBackground(uint16_t color){
+    uint8_t x_coords[] = {0, 0, 0, WIDTH - 1};
+    uint8_t y_coords[] = {0, 0, 0, HEIGHT - 1};
+    uint32_t numPixels = (HEIGHT*WIDTH);
+    uint8_t ramwr = RAMWR;
+
+    sendCommand((uint8_t)RASET, y_coords, 4);
+    sendCommand((uint8_t)CASET, x_coords, 4);
+        
+    cs_select();
+    dc_select();
+    spi_write_blocking(spi_default, (const uint8_t *)&ramwr, 1);
+    dc_deselect();
+
+    for(int i = 0; i < numPixels; i++){
+        spi_write_blocking(spi_default, (uint8_t *)&color, 2);
+    }
+    cs_deselect();
+    sendCommand((uint8_t)NOP, 0, 0);
+}
+
+//TODO maybe this can accept an ASCII letter and decode it? Currently it accepts my
+//weird 25 bit numbers that I have defined in the header file.
+void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t background){
+    uint8_t pixel_counter = 0;
+    uint8_t x_pos = 0;
+    uint8_t y_pos = 0;
+    uint8_t x_coords[] = {0, 0, 0, 0};
+    uint8_t y_coords[] = {0, 0, 0, 0};
+    
+
+    while(pixel_counter < 25){
+        //Set up the coordinates
+        x_coords[1] = x + x_pos;
+        x_coords[3] = x + x_pos;
+        y_coords[1] = y + y_pos;
+        y_coords[3] = y + y_pos;
+
+        //Set the coordinates
+        sendCommand((uint8_t)CASET, x_coords, 4);
+        sendCommand((uint8_t)RASET, y_coords, 4);
+        
+        //Check if the current pixel should be part of the letter or the background
+        if((((letter >> (24 - pixel_counter)) & 0x1)) == 0x1){
+            sendCommand((uint8_t)RAMWR, (const uint8_t *)&color, 2);
+        }else{
+            sendCommand((uint8_t)RAMWR, (const uint8_t *)&background, 2);
+        }
+        sendCommand((uint8_t)NOP, 0, 0);
+
+        //Set up the next x and y pixel locations
+        
+        if((pixel_counter % 5) == 4){
+            x_pos = 0; 
+        }else{
+            x_pos++;
+        }
+
+        if((x_pos == 0) && (pixel_counter != 0)){
+            y_pos++;
+        }else{}
+
+        pixel_counter ++;
+    }
+}
+
+
+
+
+/*Setters*/
 void cs_select(void) {
     asm volatile("nop \n nop \n nop \n"); //Just copying what the sdk does
     gpio_put(PICO_DEFAULT_SPI_CSN_PIN, 0); //Active low
