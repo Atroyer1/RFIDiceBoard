@@ -17,3 +17,5 @@ build
 *.swo
 *.zip
 *fp-info-cache
+TAGS
+tags
