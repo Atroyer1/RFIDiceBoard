@@ -3,11 +3,13 @@
 
 int main() {
     uint8_t testNum = 0x0000;
+    uint8_t testString[]= "omg does work";
 
     tft_init();
 
     //Testing drawBackground
     drawBackground(0x0000);
+
     //Testing drawPixel
     /******************************************************
     for(uint8_t i = 30; i <= 35; i++){
@@ -16,15 +18,19 @@ int main() {
         }
     } 
     *****************************************************/
+
     //Testing drawLetter
     /******************************************************/
     drawLetter(l_A, 5, 5, 0xFFFF, 0x0000);
     drawLetter(l_B, 11, 5, 0xFFFF, 0x0000);
     drawLetter(l_X, 17, 5, 0xFFFF, 0x0000);
-    drawLetter(l_Z, 23, 5, 0xFFFF, 0x0000);
+    drawLetter(l_Y, 23, 5, 0xFFFF, 0x0000);
     /******************************************************/
 
+    //Testing drawString
     /******************************************************/
+    drawString(testString, 5, 30, 0xFFFF, 0x0000);
+
     /******************************************************/
     while (1) {
         testNum = ~testNum;

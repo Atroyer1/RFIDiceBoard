@@ -4,6 +4,7 @@ void tft_init(void);
 void drawPixel(uint8_t x, uint8_t y, uint16_t color);
 void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
 void drawBackground(uint16_t color);
+uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
 
 
 
@@ -127,3 +128,6 @@ void drawBackground(uint16_t color);
 #define l_7 0b1111000010001000010000100
 #define l_8 0b0110010010011001001001100
 #define l_9 0b0110010010011100001001100
+
+#define l_space 0b0000000000000000000000000
+#define l_not_a_letter 0b1111111111111111111111111

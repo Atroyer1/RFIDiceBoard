@@ -7,7 +7,11 @@
 //private functions
 
 
+//Local Function declarations
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes);
+uint8_t string_length(uint8_t *string);
+uint32_t decodeToPixelMap(uint8_t ch);
+
 void cs_select(void);
 void cs_deselect(void);
 void dc_select(void);
@@ -17,6 +21,9 @@ void rst_deselect(void);
 
 /************************************************************************************/
 //Display initialization commands stored in an array for easy step-through
+//
+//TODO figure out how to store this somewhere else. I don't believe this needs to be a static const
+//     Ask Alex how he would store something like this
 static const uint8_t 
     init_commands[] = {
     21,                         //21 commands in this initialization
@@ -182,7 +189,7 @@ void drawBackground(uint16_t color){
 }
 
 //TODO maybe this can accept an ASCII letter and decode it? Currently it accepts my
-//weird 25 bit numbers that I have defined in the header file.
+//     weird 25 bit numbers that I have defined in the header file.
 void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t background){
     uint8_t pixel_counter = 0;
     uint8_t x_pos = 0;
@@ -226,6 +233,187 @@ void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t 
     }
 }
 
+//Takes in a char array, coordinates, letter color, and background color
+//
+//Draws a string on the display. 
+//If the string fits it will return the length of the string.
+//If the string doesn't fit it will return 0
+uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16_t background){
+
+    uint8_t ret;
+    uint8_t l_x = x;
+    uint8_t l_y = y;
+    uint32_t pixelMap;
+    //Check the number of characters
+    uint8_t string_len = string_length(string);
+
+    //Each character is 5 pixel wide and has a pixel of kerning between each character
+    //If the number of characters * 6 is wider than the display, return
+    if(WIDTH > (string_len * 6)){
+        drawLetter(l_7, 100, 100, color, background);
+        for(int i = 0; i < string_len; i++){
+            //what is the character?
+            pixelMap = decodeToPixelMap(string[i]);
+            //print the character
+            drawLetter(pixelMap, l_x, l_y, color, background);
+            //increment coordinates
+            l_x += 6;
+        }
+    }else{
+        ret = 0;
+    }
+}
+
+//Checks the length of the string
+uint8_t string_length(uint8_t *string){
+    uint8_t i = 0;
+    uint8_t ret;
+    while((string[i] != '\0') && (i < 255)){
+        i++;
+    }
+    if(i == 255){
+        ret = 0;
+    }else{
+        ret = i;
+    }
+    return ret;
+}
+
+//Don't forget to match case of everything
+uint32_t decodeToPixelMap(uint8_t ch){
+    uint32_t ret;
+    uint8_t l_ch = ch;
+    //Check what the character is
+    if((l_ch >= 'A') && (l_ch <= 'Z')){
+        //Uppercase letter
+    }else if((l_ch >= 'a') && (l_ch <= 'z')){
+        //Lowercase letter
+        //
+        //So we change it to an uppercase letter
+        l_ch -= 0x20;
+    }else if((l_ch >= '0') && (l_ch <= '9')){
+        //Number, no change needed
+    }else{
+        //Not a character
+        ret = l_not_a_letter;
+    }
+    switch(l_ch){
+        case ' ':
+            ret = l_space;
+            break;
+        case 'A':
+            ret = l_A;
+            break;
+        case 'B':
+            ret = l_B;
+            break;
+        case 'C':
+            ret = l_C;
+            break;
+        case 'D':
+            ret = l_D;
+            break;
+        case 'E':
+            ret = l_E;
+            break;
+        case 'F':
+            ret = l_F;
+            break;
+        case 'G':
+            ret = l_G;
+            break;
+        case 'H':
+            ret = l_H;
+            break;
+        case 'I':
+            ret = l_I;
+            break;
+        case 'J':
+            ret = l_J;
+            break;
+        case 'K':
+            ret = l_K;
+            break;
+        case 'L':
+            ret = l_L;
+            break;
+        case 'M':
+            ret = l_M;
+            break;
+        case 'N':
+            ret = l_N;
+            break;
+        case 'O':
+            ret = l_O;
+            break;
+        case 'P':
+            ret = l_P;
+            break;
+        case 'Q':
+            ret = l_Q;
+            break;
+        case 'R':
+            ret = l_R;
+            break;
+        case 'S':
+            ret = l_S;
+            break;
+        case 'T':
+            ret = l_T;
+            break;
+        case 'U':
+            ret = l_U;
+            break;
+        case 'V':
+            ret = l_V;
+            break;
+        case 'W':
+            ret = l_W;
+            break;
+        case 'X':
+            ret = l_X;
+            break;
+        case 'Y':
+            ret = l_Y;
+            break;
+        case 'Z':
+            ret = l_Z;
+            break;
+
+
+        case '0':
+            ret = l_0;
+            break;
+        case '1':
+            ret = l_1;
+            break;
+        case '3':
+            ret = l_2;
+            break;
+        case '4':
+            ret = l_4;
+            break;
+        case '5':
+            ret = l_5;
+            break;
+        case '6':
+            ret = l_6;
+            break;
+        case '7':
+            ret = l_7;
+            break;
+        case '8':
+            ret = l_8;
+            break;
+        case '9':
+            ret = l_9;
+            break;
+        default:
+            ret = l_not_a_letter;
+            break;
+    }
+    return ret;
+}
 
 
 
