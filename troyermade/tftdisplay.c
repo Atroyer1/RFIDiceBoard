@@ -1,6 +1,5 @@
-#include "pico/stdlib.h"
 #include "hardware/spi.h"
-#include "hardware/gpio.h"
+#include "pico/stdlib.h"
 #include "tftdisplay.h"
 
 
@@ -250,7 +249,6 @@ uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16
     //Each character is 5 pixel wide and has a pixel of kerning between each character
     //If the number of characters * 6 is wider than the display, return
     if(WIDTH > (string_len * 6)){
-        drawLetter(l_7, 100, 100, color, background);
         for(int i = 0; i < string_len; i++){
             //what is the character?
             pixelMap = decodeToPixelMap(string[i]);
@@ -279,7 +277,7 @@ uint8_t string_length(uint8_t *string){
     return ret;
 }
 
-//Don't forget to match case of everything
+//Decodes a character into one of my pixelMaps defined in tftdisplay.h
 uint32_t decodeToPixelMap(uint8_t ch){
     uint32_t ret;
     uint8_t l_ch = ch;

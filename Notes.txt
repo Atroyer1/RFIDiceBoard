@@ -1,0 +1,17 @@
+Hardware errors:
+
+Swiss cheese in the battery charger
+Professor John Lund had issues placing the 4 pin BGA linear regulator so a SOT-23-5 was used instead
+The low-side NMOS to connect the battery ground to the circuit ground has mis-labeled pins for the NMOS's that WWU has to offer
+USB-C communication does not seem to work
+UART output for debugging was never pinned out (would make debugging a lot easier)
+TFT screen Chip Select pin is disconnected whilst the TFT screen's SD Card chip select pin is connected. These two should be swapped.
+Power switch and the JTAG connector are dangerously close together
+Capacitor for the low-voltage supervisor is unecessary and caused undesired oscillitory behavior
+3 Volt ADC voltage reference IC is mis-pinned
+C20 is the wrong size for the tantulum capacitors that WWU has to offer
+The pinout for the RFID reader and the TFT display could use silk screen labeling
+
+
+Andy Recommends for other projects:
+Make sure to recommend a UART output for debugging. Specifically the same UART output that the PICO uses for Picoprobe

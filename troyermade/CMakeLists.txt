@@ -10,6 +10,7 @@ pico_sdk_init()
 add_executable(RFIDiceBoard
   main.c
   tftdisplay.c
+  buttons.c
 )
 
 target_link_libraries(
