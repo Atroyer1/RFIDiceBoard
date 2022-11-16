@@ -11,11 +11,13 @@ add_executable(RFIDiceBoard
   main.c
   tftdisplay.c
   buttons.c
+  pn532.c
 )
 
 target_link_libraries(
     RFIDiceBoard 
     pico_stdlib
     hardware_spi
+    hardware_i2c
 )
 

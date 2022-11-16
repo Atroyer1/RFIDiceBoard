@@ -2,14 +2,75 @@
 #include "hardware/gpio.h"
 #include "tftdisplay.h"
 #include "button.h"
+#include "pn532.h"
+
+void testDisplay(void);
+void testPN532(void);
+void testDisplayAndPN532Combo(void);
 
 int main() {
+
+    //Testing buttons
+    /******************************************************/
+    //initalizing button
+    //button_init();
+
+    /******************************************************/
+    //testDisplayAndPN532Combo();
+    testPN532();
+}
+
+void testPN532(void){
+    //Testing PN532
+    uint8_t versionInfo[14];
+    uint8_t uid[4];
+    uint8_t uid_length[4];
+    pn532_init();
+    
+    pn532_send(PN532_COMMAND_GETFIRMWAREVERSION, 0, 1);
+    pn532_read(versionInfo, 14);
+    pn532_SAMConfig();
+    while(1){
+        pn532_readPassiveTargetID(0x00, uid, uid_length);
+        sleep_ms(1000);
+    }
+}
+
+//So I want the pn532 to read a uid from an RFID card and then display it on the tft
+void testDisplayAndPN532Combo(void){
+    uint8_t uid[4];
+    uint8_t old_uid0 = uid[0];
+    uint8_t versionInfo[14];
+    uint8_t uid_length[4];
+    uint8_t StringArray[] = {0, 0, 0, 0, '\0'};
+    tft_init();
+    drawBackground(0x0000);
+    pn532_init();
+    pn532_send(PN532_COMMAND_GETFIRMWAREVERSION, 0, 1);
+    pn532_read(versionInfo, 14);
+    pn532_SAMConfig();
+    drawString("running", 5, 120, 0xFFFF, 0x0000);
+    while(1){
+        pn532_readPassiveTargetID(0x00, uid, uid_length);
+        drawString("Made it to the if", 5, 30, 0xFFFF, 0x0000);
+        if(uid[0] != old_uid0){
+            old_uid0 = uid[0];
+            for(int i = 0; i < 4; i++){
+                StringArray[i] = uid[i] + '0';
+            }
+            drawString(StringArray, 5, 5, 0xFFFF, 0x0000);
+        }
+    }
+}
+
+void testDisplay(void){
     uint8_t testNum = 0x0000;
     uint8_t testString[]= "Hi Haley";
     uint8_t set = 0;
     uint8_t array[] = {0, '\0'};
     uint8_t p = 0;
 
+    //Should I stdio init here?
     tft_init();
 
     //Testing drawBackground
@@ -36,17 +97,6 @@ int main() {
     /******************************************************/
     drawString(testString, 5, 30, 0xFFFF, 0x0000);
     drawString("I am a robot", 5, 36, 0xFFFF, 0x0000);
-
-    /******************************************************/
-
-
-    //Testing a button triggering an IRQ
-    /******************************************************/
-    //initalizing button
-    button_init();
-
-    /******************************************************/
-
     while (1) {
         testNum = ~testNum;
         for(uint8_t i = 30; i <= 35; i++){
@@ -73,4 +123,5 @@ int main() {
         }
         //sleep_ms(100);
     }
+
 }
