@@ -16,8 +16,8 @@ int main() {
     //button_init();
 
     /******************************************************/
-    //testDisplayAndPN532Combo();
-    testPN532();
+    testDisplayAndPN532Combo();
+    //testPN532();
 }
 
 void testPN532(void){
@@ -30,6 +30,7 @@ void testPN532(void){
     pn532_send(PN532_COMMAND_GETFIRMWAREVERSION, 0, 1);
     pn532_read(versionInfo, 14);
     pn532_SAMConfig();
+    sleep_ms(200);
     while(1){
         pn532_readPassiveTargetID(0x00, uid, uid_length);
         sleep_ms(1000);
@@ -49,6 +50,7 @@ void testDisplayAndPN532Combo(void){
     pn532_send(PN532_COMMAND_GETFIRMWAREVERSION, 0, 1);
     pn532_read(versionInfo, 14);
     pn532_SAMConfig();
+    sleep_ms(200);
     drawString("running", 5, 120, 0xFFFF, 0x0000);
     while(1){
         pn532_readPassiveTargetID(0x00, uid, uid_length);
@@ -56,7 +58,7 @@ void testDisplayAndPN532Combo(void){
         if(uid[0] != old_uid0){
             old_uid0 = uid[0];
             for(int i = 0; i < 4; i++){
-                StringArray[i] = uid[i] + '0';
+                StringArray[i] = (uid[i] % 9) + '0';
             }
             drawString(StringArray, 5, 5, 0xFFFF, 0x0000);
         }
