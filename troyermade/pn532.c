@@ -100,11 +100,11 @@ bool pn532_readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidL
     uint8_t returnbuf[20];
     pn532_send(PN532_COMMAND_INLISTPASSIVETARGET, buf, 3);
     pn532_read(returnbuf, 20);
-    /*
+    
     for(int i = 14; i <= 17; i++){
         uid[i-14] = returnbuf[i];
     }
-    */
+    
 }
 
 //Returns 0 if no issues

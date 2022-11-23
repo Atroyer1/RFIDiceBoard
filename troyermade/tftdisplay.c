@@ -257,9 +257,11 @@ uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16
             //increment coordinates
             l_x += 6;
         }
-    }else{
         ret = 0;
+    }else{
+        ret = 1;
     }
+    return ret;
 }
 
 //Checks the length of the string
@@ -273,6 +275,40 @@ uint8_t string_length(uint8_t *string){
         ret = 0;
     }else{
         ret = i;
+    }
+    return ret;
+}
+
+//I want the display to be able to display numbers larger than 9
+//So I need to convert these numbers to a string
+//Returns true if all went well. Returns false if something went wrong
+bool numToString(uint32_t num, uint8_t *ret_string, uint8_t ret_string_len){
+    uint8_t magnitude = 0;
+    uint32_t num_l = num;
+    uint32_t power;
+    bool magCheck = false;
+    bool ret = true;
+    while(magCheck == false){
+        if((num_l) >= 10){
+            num_l = num_l/10;
+            magnitude++;
+        }else{
+            magCheck = true;
+        }
+    }
+
+    if((ret_string_len - 2) > magnitude){
+        ret = false;
+    }else{
+        //Need to get the largest magnitude. I divide by 1 << magnitude
+        for(uint8_t i = 0; i <= magnitude; i++){ 
+            power = 1;
+            for(uint8_t j = 0; j < magnitude - i; j++){
+                power = power * 10;
+            }
+            ret_string[i] = ((num / (power) % 10) + '0');
+        }
+        ret_string[magnitude + 1] = '\0';
     }
     return ret;
 }
@@ -385,8 +421,11 @@ uint32_t decodeToPixelMap(uint8_t ch){
         case '1':
             ret = l_1;
             break;
-        case '3':
+        case '2':
             ret = l_2;
+            break;
+        case '3':
+            ret = l_3;
             break;
         case '4':
             ret = l_4;

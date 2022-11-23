@@ -5,6 +5,7 @@ void drawPixel(uint8_t x, uint8_t y, uint16_t color);
 void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
 void drawBackground(uint16_t color);
 uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
+bool numToString(uint32_t num, uint8_t *ret_string, uint8_t ret_string_len);
 
 
 
