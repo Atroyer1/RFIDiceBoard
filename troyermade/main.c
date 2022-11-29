@@ -3,7 +3,6 @@
 #include "tftdisplay.h"
 #include "buttons.h"
 #include "pn532.h"
-#include "pico/util/datetime.h"
 #include "rand_gen.h"
 
 void testDisplay(void);
@@ -15,60 +14,138 @@ void testRandGen(void);
 
 int main() {
 
-
     //testButtons();
     //testDisplayAndPN532Combo();
     //testPN532();
+    //testDisplay();
     //testDisplay2();
     testRandGen();
     
 }
 
 void testRandGen(void){
-    uint8_t worked;
-    uint8_t counter = 0;
-    uint8_t counter_str[] = {0,'\0'};
-    uint8_t sec_string[] = {0, 0, '\0'};
-    datetime_t t = {
-            .year  = 2002,
-            .month = 05,
-            .day   = 1,
-            .dotw  = 1, // 0 is Sunday, so 5 is Friday
-            .hour  = 1,
-            .min   = 1,
-            .sec   = 2
-    };
-    rand_gen_init();
+    uint32_t number;
+    uint32_t num_l;
+    uint8_t magnitude = 0;
+    uint8_t x = 5;
+    bool magCheck = false;
+    uint8_t rand_string[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
+
     tft_init();
     drawBackground(0x0000);
-    rand_gen_set_curr_datetime(&t);
+    sleep_ms(500);
 
     while(1){
-        worked = numToString(counter, counter_str, 2);
-        if(!worked){
-            drawString("Bad things happened", 5, 25, 0xFFFF, 0x0000);
+        magnitude = 0;
+        magCheck = false;
+        number = rand_gen_get_rand();
+        num_l = number;
+        while(magCheck == false){
+            if((num_l) >= 10){
+                num_l = num_l/10;
+                magnitude++;
+            }else{
+                magCheck = true;
+            }
         }
-        drawString(counter_str, 5, 15, 0xFFFF, 0x0000);
-        counter++;
-        if(counter > 9){
-            counter = 0;
+        drawString("Hi Allison", 25, 100, 0xFFFF, 0x0000);
+
+        //Convert the number to a string
+        if(!numToString(number, rand_string, magnitude + 2)){
+            drawString("Problem", 25, 5, 0xFFFF, 0x00);
+            drawString("              ", 5, 16, 0xFFFF, 0x0000);
+            drawString(rand_string, 5, 100, 0xFFFF, 0x0000);
+            drawString("Magnitude is", 25, 30, 0xFFFF, 0x0000);
+            numToString(magnitude, rand_string, 2);
+            drawString(rand_string, 25, 36, 0xFFFF, 0x0000);
+            while(1){};
         }
-        rand_gen_get_curr_datetime(&t);
-        if(t.sec <= 9){
-            worked = numToString(t.sec, sec_string, 2);
-            sec_string[1] = 0;
-        }else{
-            worked = numToString(t.sec, sec_string, 3);
-        }
-        if(!worked){
-            drawString("2 Bad things       ", 5, 25, 0xFFFF, 0x0000);
-        }
-        drawString(sec_string, 5, 5, 0xFFFF, 0x0000);
-        sleep_ms(100);
+        
+        
+        x = 60 - (((magnitude) * 6));
+
+        //Display the number
+        drawString("                   . ", 5, 16, 0xFFFF, 0x0000);
+        drawString(rand_string, x, 16, 0xFFFF, 0x0000);
+        sleep_ms(200);
     }
-    
-    
+
 }
+/////////////////////////////////////////////
+/*
+void testRandGen(void){
+    bool problem = false;
+    uint8_t counter = 0;
+    uint32_t number;
+    uint8_t counter_string[] = {0, '\0'};
+    uint8_t num_string[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
+    uint8_t binary_string[] = {0, '\0'};
+    uint8_t power_string[] = {0, 0, '\0'};
+    uint8_t x = 5;
+    uint32_t power = 1;
+    tft_init();
+    drawBackground(0x0000);
+    while(1){
+        counter++;
+        counter = counter % 10;
+        numToString(counter, counter_string, 2);
+        drawString(counter_string, 5, 25, 0xFFFF, 0x0000);
+        //number = test_rand() & 100u;
+
+        number = test_rand();
+
+        x = 5;
+        
+        for(uint8_t i = 1; i < 11; i++){
+            power = 1;
+            
+            //This is a small power function
+            for(uint8_t j = 1; j < i; j++){
+                power = power * 10;
+            }
+            ////
+
+            //Power drawing
+
+            //Detecting the magnitude of the random number
+            if(number < power){
+                drawString("Power equals", 5, 74, 0xFFFF, 0x0000);
+                numToString(power, power_string, 3);
+                drawString("               ", 5, 80, 0xFFFF, 0x0000);
+                drawString(power_string, 5, 80, 0xFFFF, 0x0000);
+
+                if(!numToString(i, binary_string, 2)){
+                    drawString("AAAAAA", 20, 68, 0xFFFF, 0x0000);
+                }
+                drawString(binary_string, 5, 62, 0xFFFF, 0x0000);
+                num_string[i] = '\0';                
+                x = 59 - ((i - 1) * 6);
+                problem = numToString(number, num_string, i);
+                i = 10;
+            }
+        }
+
+        if(!problem){
+            drawString("Problem", 5, 50, 0xFFFF, 0x0000);
+            drawString("       ", 5, 56, 0xFFFF, 0x0000);
+
+            drawString(num_string, x, 56, 0xFFFF, 0x0000);
+        }else{
+            drawString("       ", 5, 56, 0xFFFF, 0x0000);
+        }
+
+        drawString("Hopefully random", 5, 5, 0xFFFF, 0x0000);
+        drawString("           ", 5, 12, 0xFFFF, 0x0000);
+
+        drawString(num_string, x, 12, 0xFFFF, 0x0000);
+
+        sleep_ms(500);
+    }
+}
+/////////////////////////////////////////////////////////////////
+*/
+
+
 
 void testButtons(void){
     button_init();

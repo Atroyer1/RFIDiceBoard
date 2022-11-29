@@ -85,6 +85,7 @@ static const uint8_t
 /************************************************************************************/
 
 //initialization
+//TODO Note, make sure this all works without stdio_init. I removed it without checking
 void tft_init(void){
     const uint8_t *l_addr = init_commands;
     uint8_t numCommands;
@@ -92,8 +93,6 @@ void tft_init(void){
     uint8_t numArgs;
     uint16_t ms;
 
-    stdio_init_all();
-    sleep_ms(10);
     spi_init(spi_default, 32000000);
 
     //SCK, TX, CSN, DC, and RS pin initalization
