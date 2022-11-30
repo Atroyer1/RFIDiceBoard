@@ -4,6 +4,7 @@
 #include "buttons.h"
 #include "pn532.h"
 #include "rand_gen.h"
+#include "adc.h"
 
 void testDisplay(void);
 void testPN532(void);
@@ -11,6 +12,7 @@ void testDisplayAndPN532Combo(void);
 void testButtons(void);
 void testDisplay2(void);
 void testRandGen(void);
+void testADC(void);
 
 int main() {
 
@@ -19,8 +21,56 @@ int main() {
     //testPN532();
     //testDisplay();
     //testDisplay2();
-    testRandGen();
+    //testRandGen();
+    testADC();
     
+}
+
+void testADC(void){
+    const float conversion_factor = 3.0f / (1 << 12);
+    uint32_t num_l;
+    uint16_t adc_num;
+    uint8_t adc_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
+    uint8_t x = 5;
+    uint8_t magnitude = 0;
+    bool magCheck = false;
+
+    tft_init();
+    drawBackground(0x0000);
+    drawString("ADC raw value", 5, 10, 0xFFFF, 0x0000);
+    
+    //Magnitude checker
+    while(1){
+        adc_num = adc_get_input();
+        magnitude = 0;
+        magCheck = false;
+        num_l = adc_num;
+        while(magCheck == false){
+            if((num_l) >= 10){
+                num_l = num_l/10;
+                magnitude++;
+            }else{
+                magCheck = true;
+            }
+        }
+        if(!numToString(adc_num, adc_str, magnitude + 2)){
+            drawString("Problem", 25, 5, 0xFFFF, 0x00);
+            drawString("              ", 5, 16, 0xFFFF, 0x0000);
+            drawString(adc_str, 5, 100, 0xFFFF, 0x0000);
+            drawString("Magnitude is", 25, 30, 0xFFFF, 0x0000);
+            numToString(magnitude, adc_str, 2);
+            drawString(adc_str, 25, 36, 0xFFFF, 0x0000);
+            while(1){};
+        }
+        x = 60 - (((magnitude) * 6));
+
+        //Display the number
+        drawString("                   . ", 5, 16, 0xFFFF, 0x0000);
+        drawString(adc_str, x, 16, 0xFFFF, 0x0000);
+        sleep_ms(200);
+    }
+
+
 }
 
 void testRandGen(void){

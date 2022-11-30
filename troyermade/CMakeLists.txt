@@ -13,6 +13,7 @@ add_executable(RFIDiceBoard
   buttons.c
   pn532.c
   rand_gen.c
+  adc.c
 )
 
 target_link_libraries(
@@ -21,5 +22,6 @@ target_link_libraries(
     hardware_spi
     hardware_i2c
     hardware_rtc
+    hardware_adc
 )
 
