@@ -29,12 +29,13 @@ int main() {
 void testADC(void){
     const float conversion_factor = 3.0f / (1 << 12);
     uint32_t num_l;
-    uint16_t adc_num;
     uint8_t adc_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
+    uint16_t adc_num;
     uint8_t x = 5;
     uint8_t magnitude = 0;
     bool magCheck = false;
 
+    adc_initialize();
     tft_init();
     drawBackground(0x0000);
     drawString("ADC raw value", 5, 10, 0xFFFF, 0x0000);
