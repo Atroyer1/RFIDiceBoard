@@ -1,4 +1,4 @@
-//public functions
+//public functions 
 
 void tft_init(void);
 void drawPixel(uint8_t x, uint8_t y, uint16_t color);
@@ -6,8 +6,6 @@ void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t 
 void drawBackground(uint16_t color);
 uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
 bool numToString(uint32_t num, uint8_t *ret_string, uint8_t ret_string_len);
-
-
 
 //Predefined pins
 

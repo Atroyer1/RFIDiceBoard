@@ -5,6 +5,7 @@
 #include "pn532.h"
 #include "rand_gen.h"
 #include "adc.h"
+#include "systickdelay.h"
 
 void testDisplay(void);
 void testPN532(void);
@@ -13,8 +14,10 @@ void testButtons(void);
 void testDisplay2(void);
 void testRandGen(void);
 void testADC(void);
+void testSystick(void);
 
 int main() {
+
 
     //testButtons();
     //testDisplayAndPN532Combo();
@@ -22,12 +25,40 @@ int main() {
     //testDisplay();
     //testDisplay2();
     //testRandGen();
-    testADC();
+    //testADC();
+    testSystick();
     
 }
 
+void testSystick(void){
+    uint32_t count = 0;
+    uint32_t num_l = 0;
+    uint8_t magnitude = 0;
+    uint8_t count_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    bool magCheck = false;
+    tft_init();
+    drawBackground(0x0000);
+    sysTick_init();
+    while(1){
+        drawString("Testing Systick", 5, 50, 0xFFFF, 0x0000);
+        sysTickWaitEvent(10U);
+        num_l = count;
+        while(magCheck == false){
+            if((num_l) >= 10){
+                num_l = num_l/10;
+                magnitude++;
+            }else{
+                magCheck = true;
+            }
+        }
+        count++;
+        numToString(count, count_str, magnitude + 2);
+        drawString("               ", 5, 5, 0xFFFF, 0x0000);
+        drawString(count_str, 5, 5, 0xFFFF, 0x0000);
+    }
+}
+
 void testADC(void){
-    const float conversion_factor = 3.0f / (1 << 12);
     uint32_t num_l;
     uint8_t adc_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint16_t adc_num;

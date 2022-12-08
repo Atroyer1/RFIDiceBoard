@@ -140,6 +140,17 @@ void tft_init(void){
     }
 }
 
+//All I gotta do is check each flag and see if anything needs service
+void tftTask(void){
+
+//Check if the ADC changed anything
+
+//Check if the buttons changed anything
+
+//Check if a dice was rolled
+
+}
+
 //self-contained spi-write
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes){
     cs_select();

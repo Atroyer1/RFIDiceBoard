@@ -14,6 +14,7 @@ add_executable(RFIDiceBoard
   pn532.c
   rand_gen.c
   adc.c
+  systickdelay.c
 )
 
 target_link_libraries(
@@ -23,5 +24,6 @@ target_link_libraries(
     hardware_i2c
     hardware_rtc
     hardware_adc
+    hardware_irq
 )
 
