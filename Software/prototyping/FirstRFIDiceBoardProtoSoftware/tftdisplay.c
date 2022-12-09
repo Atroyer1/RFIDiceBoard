@@ -140,15 +140,10 @@ void tft_init(void){
     }
 }
 
-//All I gotta do is check each flag and see if anything needs service
-void tftTask(void){
-
-//Check if the ADC changed anything
-
-//Check if the buttons changed anything
-
-//Check if a dice was rolled
-
+//TODO
+void updateTFTDisplay(void){
+    //Do I need to make a state machine here? Nah. Lets just set up some global flags
+    //  that this function checks to update numbers and words on the display
 }
 
 //self-contained spi-write
