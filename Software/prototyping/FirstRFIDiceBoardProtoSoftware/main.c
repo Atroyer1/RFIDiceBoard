@@ -24,9 +24,9 @@ int main() {
     //testPN532();
     //testDisplay();
     //testDisplay2();
-    //testRandGen();
+    testRandGen();
     //testADC();
-    testSystick();
+    //testSystick();
     
 }
 
