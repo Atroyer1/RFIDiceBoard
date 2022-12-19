@@ -7,8 +7,8 @@
 #include "rand_gen.h"
 #include "adc.h"
 
-extern uint8_t Button_Flag;
-extern uint8_t ADC_Flag;
+uint8_t Button_Flag;
+uint8_t ADC_Flag;
 
 void main(void){
 
@@ -29,11 +29,11 @@ void main(void){
             //Debounce!
             updateTFTDisplay();
             Button_Flag = 0;
+        }else if(ADC_Flag != 0){ 
+            adc_Task();
         }else{
             //Do nothing
             asm("nop");
         }
-
-        adc_Task();
     }
 }

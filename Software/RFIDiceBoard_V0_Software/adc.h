@@ -8,5 +8,5 @@ void adc_initialize(void);
 void adc_Task(void);
 typedef enum {BATT_FULL, BATT_MED, BATT_LOW, BATT_DYING} BATTSTATE_T;
 
-extern BATTSTATE_T battstate;
+extern BATTSTATE_T Batt_State;
 

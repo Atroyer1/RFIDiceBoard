@@ -1,5 +1,6 @@
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
+#include "adc.h"
 #include "main.h"
 #include "tftdisplay.h"
 
@@ -90,7 +91,6 @@ static const uint8_t
 /************************************************************************************/
 
 //initialization
-//TODO Note, make sure this all works without stdio_init. I removed it without checking
 void tft_init(void){
     const uint8_t *l_addr = init_commands;
     uint8_t numCommands;
@@ -153,7 +153,7 @@ void updateTFTDisplay(void){
     uint8_t magnitude = 0;
     static uint8_t count = 0;
     count ++;
-    test_str[0] = (count % 9) + '0';
+    test_str[0] = (count % 10) + '0';
 
     drawString(test_str, 5, 17, 0xFFFF, 0x0000);
 
@@ -162,13 +162,28 @@ void updateTFTDisplay(void){
         magnitude = getMagnitude(Button_Flag);
         //Adding 2 to num_len of numToString for the 10^0 not covered by magnitude and the '\0'
         numToString(Button_Flag, button_num_str, magnitude + 2);
-        drawString("IRQ callback says button is", 5, 5, 0xFFFF, 0x0000);
         drawString(button_num_str, 5, 11, 0xFFFF, 0x0000);
         Button_Flag = 0;
 
     //ADC check
     }else if(ADC_Flag != 0){
+        switch(Batt_State){
+        case(BATT_FULL):
+            drawString("Battery full", 50, 5, 0xFFFF, 0x0000);
+        break;
+        case(BATT_MED):
+            drawString("Battery okay", 50, 5, 0xFFFF, 0x0000);
+        break;
+        case(BATT_LOW):
+            drawString("Battery low ", 50, 5, 0xFFFF, 0x0000);
+        break;
+        case(BATT_DYING):
+            drawString("Battery dead", 50, 5, 0xFFFF, 0x0000);
+        break;
+        default:
+        break;
 
+        }
         ADC_Flag = 0;
     }else{}
 
