@@ -4,13 +4,7 @@
 #include "adc.h"
 #include "main.h"
 
-//For my project(RFIDiceBoard) 2820 and above is 4.2 volts
-//
-//2488-2490 is at 3.70 Volts (Should technically have 20% of power left)
-//2417 is below 3.59
-
 BATTSTATE_T Batt_State;
-uint16_t adc_value;
 repeating_timer_t timer;
 
 bool adc_irq_handler(repeating_timer_t *rt);
@@ -31,26 +25,33 @@ void adc_initialize(void){
 
 void adc_Task(void){
     static BATTSTATE_T prev_Batt_State;
+    static uint16_t prev_adc_value;
+    static uint16_t adc_value;
 
     adc_value = adc_read();
+    //Hysteresis
+    if(((adc_value + 10) > (prev_adc_value)) || ((adc_value - 10) < (prev_adc_value))){
+        prev_adc_value = adc_value;
+        if(adc_value > BATT_FULL_VAL){
+            //All is good
+            Batt_State = BATT_FULL;
+        }else if(adc_value > BATT_MED_VAL){
+            //All is okay
+            Batt_State = BATT_MED;
+        }else if(adc_value > BATT_LOW_VAL){
+            //NEEDS TO BE CHARGED
+            Batt_State = BATT_LOW;
+        }else{
+            //GONNA DIE IN A MOMENT
+            Batt_State = BATT_DYING;
+        }
 
-    if(adc_value > BATT_FULL_VAL){
-        //All is good
-        Batt_State = BATT_FULL;
-    }else if(adc_value > BATT_MED_VAL){
-        //All is okay
-        Batt_State = BATT_MED;
-    }else if(adc_value > BATT_LOW_VAL){
-        //NEEDS TO BE CHARGED
-        Batt_State = BATT_LOW;
+        if(Batt_State != prev_Batt_State){
+            prev_Batt_State = Batt_State;
+            updateTFTDisplay();
+        }
     }else{
-        //GONNA DIE IN A MOMENT
-        Batt_State = BATT_DYING;
-    }
-
-    if(Batt_State != prev_Batt_State){
-        prev_Batt_State = Batt_State;
-        updateTFTDisplay();
+        //nothing. Previous value didn't change enough
     }
 }
 

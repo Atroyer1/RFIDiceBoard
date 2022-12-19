@@ -144,7 +144,6 @@ void tft_init(void){
         numCommands--;
     }
     drawBackground(0x0000);
-    drawString("Bababa", 5, 23, 0xFFFF, 0x0000);
 }
 
 void updateTFTDisplay(void){
@@ -155,6 +154,7 @@ void updateTFTDisplay(void){
     count ++;
     test_str[0] = (count % 10) + '0';
 
+    drawString("times updated mod ten", 1, 11, 0xFFFF, 0x0000);
     drawString(test_str, 5, 17, 0xFFFF, 0x0000);
 
     //Button check
