@@ -182,9 +182,7 @@ void updateTFTDisplay(void){
         break;
         default:
         break;
-
         }
-        ADC_Flag = 0;
     }else{}
 
     //Do I need to make a state machine here? Nah. Lets just set up some global flags

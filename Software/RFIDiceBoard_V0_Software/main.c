@@ -24,13 +24,12 @@ void main(void){
     updateTFTDisplay();
     //Loop forever
     while(1){
-        //sleep_ms(1);
         if(Button_Flag != 0){
-            //Debounce!
             updateTFTDisplay();
             Button_Flag = 0;
         }else if(ADC_Flag != 0){ 
             adc_Task();
+            ADC_Flag = 0;
         }else{
             //Do nothing
             asm("nop");

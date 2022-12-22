@@ -5,9 +5,9 @@
 #include "main.h"
 
 BATTSTATE_T Batt_State;
-repeating_timer_t timer;
+repeating_timer_t battery_timer;
 
-bool adc_irq_handler(repeating_timer_t *rt);
+bool adc_timer_irq_handler(repeating_timer_t *rt);
 
 void adc_initialize(void){
     adc_init();
@@ -16,7 +16,7 @@ void adc_initialize(void){
     adc_gpio_init(26);
     // Select ADC input 0 (GPIO26)
     adc_select_input(0);
-    if(!add_repeating_timer_ms(1000u, adc_irq_handler, 0u, &timer)){
+    if(!add_repeating_timer_ms(1000u, adc_timer_irq_handler, 0u, &battery_timer)){
         while(1){
             //Trap if the timer can't be added
         }
@@ -55,7 +55,7 @@ void adc_Task(void){
     }
 }
 
-bool adc_irq_handler(repeating_timer_t *rt){
+bool adc_timer_irq_handler(repeating_timer_t *rt){
     ADC_Flag = 1;
     return 1;
 }
