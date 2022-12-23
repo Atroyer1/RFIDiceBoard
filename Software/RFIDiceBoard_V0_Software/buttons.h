@@ -9,4 +9,4 @@
 
 void button_init(void);
 
-typedef enum {SW_OFF, SW_EDGE, SW_VERF} SWSTATE_T;
+typedef enum {SW_OFF, SW_EDGE, SW_VERF, SW_HELD} SWSTATE_T;

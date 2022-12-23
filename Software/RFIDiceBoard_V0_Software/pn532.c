@@ -10,7 +10,6 @@
 uint8_t pn532_isReady(void);
 
 void pn532_init(void){
-
     gpio_init(RST_PIN);
     gpio_set_dir(RST_PIN, GPIO_OUT); 
     gpio_init(IRQ_PIN);
@@ -27,6 +26,8 @@ void pn532_init(void){
     sleep_ms(400);
     gpio_put(RST_PIN, 1);
     sleep_ms(10);
+
+    pn532_SAMConfig();
 }
 
 //Okay
@@ -126,7 +127,6 @@ uint8_t pn532_read_ACK(void){
     }
     return ret;
 }
-
 
 //IRQ pin gets pulled low when the PN532 is ready with something
 uint8_t pn532_isReady(void){

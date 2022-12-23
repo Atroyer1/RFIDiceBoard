@@ -162,8 +162,7 @@ void updateTFTDisplay(void){
         magnitude = getMagnitude(Button_Flag);
         //Adding 2 to num_len of numToString for the 10^0 not covered by magnitude and the '\0'
         numToString(Button_Flag, button_num_str, magnitude + 2);
-        drawString(button_num_str, 5, 11, 0xFFFF, 0x0000);
-        Button_Flag = 0;
+        drawString(button_num_str, 5, 23, 0xFFFF, 0x0000);
 
     //ADC check
     }else if(ADC_Flag != 0){

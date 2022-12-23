@@ -9,6 +9,7 @@
 
 uint8_t Button_Flag;
 uint8_t ADC_Flag;
+uint8_t PN532_Flag;
 
 void main(void){
 
