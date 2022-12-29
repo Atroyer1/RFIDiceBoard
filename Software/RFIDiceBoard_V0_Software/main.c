@@ -7,6 +7,7 @@
 #include "rand_gen.h"
 #include "adc.h"
 
+uint8_t RFID_Flag;
 uint8_t Button_Flag;
 uint8_t ADC_Flag;
 uint8_t PN532_Flag;
@@ -26,11 +27,15 @@ void main(void){
     //Loop forever
     while(1){
         if(Button_Flag != 0){
+            //Eventually the buttons are gonna have to do something else
             updateTFTDisplay();
             Button_Flag = 0;
         }else if(ADC_Flag != 0){ 
             adc_Task();
             ADC_Flag = 0;
+        }else if(RFID_Flag != 0){ 
+            RFID_Task();
+            RFID_Flag = 0;
         }else{
             //Do nothing
             asm("nop");

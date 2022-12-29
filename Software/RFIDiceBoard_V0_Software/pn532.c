@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
+#include "main.h"
 #include "pn532.h"
 
 #define I2CADDR 0x24
@@ -8,12 +9,21 @@
 #define IRQ_PIN 3
 
 uint8_t pn532_isReady(void);
+void pn532_gpio_irq_handler(uint gpio, uint32_t events);
 
 void pn532_init(void){
+    //RP2040 getting ready
     gpio_init(RST_PIN);
     gpio_set_dir(RST_PIN, GPIO_OUT); 
+    /*
     gpio_init(IRQ_PIN);
     gpio_set_dir(IRQ_PIN, GPIO_IN); 
+    */
+    gpio_set_function(IRQ_PIN, GPIO_FUNC_SIO);
+    gpio_set_input_enabled(IRQ_PIN, true);
+    gpio_set_input_hysteresis_enabled(IRQ_PIN, false);
+
+    gpio_set_irq_enabled_with_callback(IRQ_PIN, GPIO_IRQ_LEVEL_LOW, true, &pn532_gpio_irq_handler);
     //i2c init
     i2c_init(i2c_default, 100 * 1000);
     gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
@@ -27,7 +37,20 @@ void pn532_init(void){
     gpio_put(RST_PIN, 1);
     sleep_ms(10);
 
-    pn532_SAMConfig();
+    //Setting the PN532 to be a card reader
+    //pn532_SAMConfig();
+
+    //pn532_readPassiveTargetID_send(0x00);
+}
+
+void pn532_gpio_irq_handler(uint gpio, uint32_t events){
+    RFID_Flag = 1;
+}
+
+//Supposedly I have setup the pn532 to receive input from any rfid thing//TODO after potty
+void RFID_Task(void){
+    uint8_t uid[4];
+    //pn532_readPassiveTargetID_recieve(uid);
 }
 
 //Okay
@@ -96,12 +119,17 @@ void pn532_SAMConfig(void){
     pn532_read(buf2, 8);
 }
 
-bool pn532_readPassiveTargetID(uint8_t cardbaudrate, uint8_t *uid, uint8_t *uidLength){
+void pn532_readPassiveTargetID_send(uint8_t cardbaudrate){
     uint8_t buf[] = {1, cardbaudrate};
-    uint8_t returnbuf[20];
+
     pn532_send(PN532_COMMAND_INLISTPASSIVETARGET, buf, 3);
+}
+
+
+void pn532_readPassiveTargetID_recieve(uint8_t *uid){
+    uint8_t returnbuf[20];
+
     pn532_read(returnbuf, 20);
-    
     for(int i = 14; i <= 17; i++){
         uid[i-14] = returnbuf[i];
     }

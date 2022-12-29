@@ -146,6 +146,8 @@ void tft_init(void){
     drawBackground(0x0000);
 }
 
+//Do I need to make a state machine here? Nah. Lets just set up some global flags
+//  that this function checks to update numbers and words on the display
 void updateTFTDisplay(void){
     uint8_t button_num_str[] = {0, 0, 0, 0, 0};
     uint8_t test_str[] = {0, '\0'};
@@ -159,6 +161,8 @@ void updateTFTDisplay(void){
 
     //Button check
     if(Button_Flag != 0){
+        //TODO test clearing the RFID notification
+        drawString("              ", 5, 29, 0xFFFF, 0x0000);
         magnitude = getMagnitude(Button_Flag);
         //Adding 2 to num_len of numToString for the 10^0 not covered by magnitude and the '\0'
         numToString(Button_Flag, button_num_str, magnitude + 2);
@@ -182,10 +186,10 @@ void updateTFTDisplay(void){
         default:
         break;
         }
+    }else if(RFID_Flag != 0){
+        drawString("RFID Detection", 5, 29, 0xFFFF, 0x0000);
     }else{}
 
-    //Do I need to make a state machine here? Nah. Lets just set up some global flags
-    //  that this function checks to update numbers and words on the display
 }
 
 uint32_t getMagnitude(uint32_t num){
