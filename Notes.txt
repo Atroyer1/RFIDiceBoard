@@ -15,6 +15,7 @@ The pinout for the RFID reader and the TFT display could use silk screen labelin
 
 Andy Recommends for other projects:
 Make sure to recommend a UART output for debugging. Specifically the same UART output that the PICO uses for Picoprobe
+The pico-SDK that comes with all the examples and such does not have the most updated SDK with the raw irq handlers
 
 
 Requirment changes I'd like to make:

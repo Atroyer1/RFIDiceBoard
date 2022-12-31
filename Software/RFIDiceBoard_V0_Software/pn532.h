@@ -1,13 +1,7 @@
 void RFID_Task(void);
 void pn532_init(void);
 
-//TODO make all of these functions private
-uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len);
-void pn532_read(uint8_t *buffer, size_t len);
-void pn532_SAMConfig(void);
-void pn532_readPassiveTargetID_send(uint8_t cardbaudrate);
-void pn532_readPassiveTargetID_recieve(uint8_t *uid);
-uint8_t pn532_read_ACK(void);
+#define PN532_IRQ_PIN 3
 
 #define PN532_PREAMBLE (uint8_t)0x00   // Command sequence start, byte 1/3
 #define PN532_STARTCODE1 (uint8_t)0x00 // Command sequence start, byte 2/3

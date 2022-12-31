@@ -19,6 +19,7 @@ add_executable(RFIDiceBoard
 target_link_libraries(
     RFIDiceBoard 
     pico_stdlib
+    pico_time
     hardware_spi
     hardware_i2c
     hardware_rtc

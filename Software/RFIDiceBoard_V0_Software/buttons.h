@@ -8,5 +8,5 @@
 #define BTN8_PIN 13
 
 void button_init(void);
-
-typedef enum {SW_OFF, SW_EDGE, SW_VERF, SW_HELD} SWSTATE_T;
+//void Debounce_Btn(uint8_t btn_num);
+void Button_Task(void);

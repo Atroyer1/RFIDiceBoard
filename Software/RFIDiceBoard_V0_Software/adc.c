@@ -23,9 +23,9 @@ void adc_initialize(void){
     }
 }
 
-void adc_Task(void){
-    static BATTSTATE_T prev_Batt_State;
-    static uint16_t prev_adc_value;
+void Adc_Task(void){
+    static BATTSTATE_T prev_Batt_State = 20; //Set to a number that Batt_State can't reach
+    static uint16_t prev_adc_value = 0;
     static uint16_t adc_value;
 
     adc_value = adc_read();
@@ -58,4 +58,5 @@ void adc_Task(void){
 bool adc_timer_irq_handler(repeating_timer_t *rt){
     ADC_Flag = 1;
     return 1;
+
 }

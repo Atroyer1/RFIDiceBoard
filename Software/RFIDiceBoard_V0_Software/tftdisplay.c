@@ -3,6 +3,7 @@
 #include "adc.h"
 #include "main.h"
 #include "tftdisplay.h"
+#include "pico/sync.h"
 
 //private Function declarations
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes);
@@ -23,6 +24,8 @@ void dc_select(void);
 void dc_deselect(void);
 void rst_select(void);
 void rst_deselect(void);
+
+critical_section_t crit_section;
 
 /************************************************************************************/
 //Display initialization commands stored in an array for easy step-through
@@ -143,6 +146,8 @@ void tft_init(void){
         }
         numCommands--;
     }
+
+    critical_section_init(&crit_section);
     drawBackground(0x0000);
 }
 
@@ -150,19 +155,26 @@ void tft_init(void){
 //  that this function checks to update numbers and words on the display
 void updateTFTDisplay(void){
     uint8_t button_num_str[] = {0, 0, 0, 0, 0};
-    uint8_t test_str[] = {0, '\0'};
+    uint8_t test_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint8_t magnitude = 0;
     static uint8_t count = 0;
-    count ++;
-    test_str[0] = (count % 10) + '0';
 
-    drawString("times updated mod ten", 1, 11, 0xFFFF, 0x0000);
-    drawString(test_str, 5, 17, 0xFFFF, 0x0000);
+    critical_section_enter_blocking(&crit_section); 
+    drawString("button Flag changes  ", 1, 11, 0xFFFF, 0x0000);
+    drawString("up button for menu   ", 1, 80, 0xFFFF, 0x0000);
 
     //Button check
     if(Button_Flag != 0){
+
+        count ++;
+
+        drawString("                     ", 5, 17, 0xFFFF, 0x0000);
+        test_str[0] = (count % 10) + '0';
+        numToString(count, test_str, magnitude + 2);
+        drawString(test_str, 5, 17, 0xFFFF, 0x0000);
+
         //TODO test clearing the RFID notification
-        drawString("              ", 5, 29, 0xFFFF, 0x0000);
+        //drawString("              ", 5, 29, 0xFFFF, 0x0000);
         magnitude = getMagnitude(Button_Flag);
         //Adding 2 to num_len of numToString for the 10^0 not covered by magnitude and the '\0'
         numToString(Button_Flag, button_num_str, magnitude + 2);
@@ -189,6 +201,7 @@ void updateTFTDisplay(void){
     }else if(RFID_Flag != 0){
         drawString("RFID Detection", 5, 29, 0xFFFF, 0x0000);
     }else{}
+    critical_section_exit(&crit_section);
 
 }
 

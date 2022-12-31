@@ -6,24 +6,29 @@
 
 #define I2CADDR 0x24
 #define RST_PIN 2
-#define IRQ_PIN 3
 
+uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len);
+void pn532_read(uint8_t *buffer, size_t len);
+void pn532_SAMConfig(void);
+void pn532_readPassiveTargetID_send(uint8_t cardbaudrate);
+void pn532_readPassiveTargetID_recieve(uint8_t *uid);
+uint8_t pn532_read_ACK(void);
 uint8_t pn532_isReady(void);
-void pn532_gpio_irq_handler(uint gpio, uint32_t events);
+
+//void pn532_gpio_irq_handler(uint gpio, uint32_t events);
 
 void pn532_init(void){
     //RP2040 getting ready
     gpio_init(RST_PIN);
     gpio_set_dir(RST_PIN, GPIO_OUT); 
     /*
-    gpio_init(IRQ_PIN);
-    gpio_set_dir(IRQ_PIN, GPIO_IN); 
+    gpio_init(PN532_IRQ_PIN);
+    gpio_set_dir(PN532_IRQ_PIN, GPIO_IN); 
     */
-    gpio_set_function(IRQ_PIN, GPIO_FUNC_SIO);
-    gpio_set_input_enabled(IRQ_PIN, true);
-    gpio_set_input_hysteresis_enabled(IRQ_PIN, false);
+    gpio_set_function(PN532_IRQ_PIN, GPIO_FUNC_SIO);
+    gpio_set_input_enabled(PN532_IRQ_PIN, true);
+    gpio_set_input_hysteresis_enabled(PN532_IRQ_PIN, false);
 
-    gpio_set_irq_enabled_with_callback(IRQ_PIN, GPIO_IRQ_LEVEL_LOW, true, &pn532_gpio_irq_handler);
     //i2c init
     i2c_init(i2c_default, 100 * 1000);
     gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
@@ -38,19 +43,29 @@ void pn532_init(void){
     sleep_ms(10);
 
     //Setting the PN532 to be a card reader
-    //pn532_SAMConfig();
+    pn532_SAMConfig();
 
-    //pn532_readPassiveTargetID_send(0x00);
+    pn532_readPassiveTargetID_send(0x00);
+
+    //irq pin can now work after setting up for reading RFID tags
+    //gpio_set_irq_enabled_with_callback(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
 }
 
+/*
 void pn532_gpio_irq_handler(uint gpio, uint32_t events){
     RFID_Flag = 1;
+    //disable the irq so that I can talk to the pn532 easier
+    gpio_set_irq_enabled(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, false);
 }
+*/
 
-//Supposedly I have setup the pn532 to receive input from any rfid thing//TODO after potty
 void RFID_Task(void){
     uint8_t uid[4];
-    //pn532_readPassiveTargetID_recieve(uid);
+    pn532_readPassiveTargetID_recieve(uid);
+
+    pn532_readPassiveTargetID_send(0x00);
+
+    //gpio_set_irq_enabled(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, true);
 }
 
 //Okay
@@ -158,5 +173,5 @@ uint8_t pn532_read_ACK(void){
 
 //IRQ pin gets pulled low when the PN532 is ready with something
 uint8_t pn532_isReady(void){
-    return !gpio_get(IRQ_PIN);
+    return !gpio_get(PN532_IRQ_PIN);
 }
