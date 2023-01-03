@@ -1,8 +1,8 @@
 //public functions
 
 void tft_init(void);
-
-void updateTFTDisplay(void);
+//void updateTFTDisplay(void);
+void TFTDisplayTask(void);
 
 //Predefined pins
 

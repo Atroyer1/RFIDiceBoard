@@ -17,6 +17,8 @@ uint8_t pn532_isReady(void);
 
 //void pn532_gpio_irq_handler(uint gpio, uint32_t events);
 
+bool waiting_for_read;
+
 void pn532_init(void){
     //RP2040 getting ready
     gpio_init(RST_PIN);
@@ -61,11 +63,13 @@ void pn532_gpio_irq_handler(uint gpio, uint32_t events){
 
 void RFID_Task(void){
     uint8_t uid[4];
-    pn532_readPassiveTargetID_recieve(uid);
-
-    pn532_readPassiveTargetID_send(0x00);
-
-    //gpio_set_irq_enabled(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, true);
+    volatile bool pn532_irq_pin;
+    
+    }
+    pn532_irq_pin = !gpio_get(IRQ_PIN);
+    if(pn532_irq_pin){
+        //The device wants to talk to us about something
+    }
 }
 
 //Okay

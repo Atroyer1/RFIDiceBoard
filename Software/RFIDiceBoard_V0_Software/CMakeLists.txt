@@ -14,6 +14,7 @@ add_executable(RFIDiceBoard
   pn532.c
   rand_gen.c
   adc.c
+  timer.c
 )
 
 target_link_libraries(
