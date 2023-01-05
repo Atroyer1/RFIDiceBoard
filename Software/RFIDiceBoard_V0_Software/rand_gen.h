@@ -1,1 +1,1 @@
-uint32_t rand_gen_get_rand(void);
+uint32_t RandGen_GetRand32bit(void);

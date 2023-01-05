@@ -18,6 +18,7 @@ uint8_t Button_Flag;
 uint8_t ADC_Flag;
 uint8_t RFID_Flag;
 uint8_t Debounce_Flag;
+uint32_t Current_Die;
 //uint8_t timer_main_flag;
 
 //repeating_timer_t timer_main;
@@ -35,6 +36,7 @@ void main(void){
     Button_Flag = 0;
     ADC_Flag = 0;
     RFID_Flag = 0;
+    Current_Die = 0;
     //GPIO_irq_Flag = 0;
     //timer_main_flag = 1;
     

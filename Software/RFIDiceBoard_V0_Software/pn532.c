@@ -3,6 +3,7 @@
 #include "hardware/i2c.h"
 #include "main.h"
 #include "pn532.h"
+#include "timer.h"
 
 #define I2CADDR 0x24
 #define RST_PIN 2
@@ -53,22 +54,34 @@ void pn532_init(void){
     //gpio_set_irq_enabled_with_callback(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
 }
 
-/*
-void pn532_gpio_irq_handler(uint gpio, uint32_t events){
-    RFID_Flag = 1;
-    //disable the irq so that I can talk to the pn532 easier
-    gpio_set_irq_enabled(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, false);
-}
-*/
 
 void RFID_Task(void){
     uint8_t uid[4];
-    volatile bool pn532_irq_pin;
+    uint32_t number_uid;
+    bool volatile pn532_irq_pin;
+    static bool got_one;
+    static uint32_t waitCount;
+    uint32_t sliceCount;
+    //uint32_t const lookupDie[7] = {D4UID, D6UID, D8UID, D10UID, D12UID, D20UID, D100UID};
     
-    }
-    pn532_irq_pin = !gpio_get(IRQ_PIN);
-    if(pn532_irq_pin){
-        //The device wants to talk to us about something
+    sliceCount = TimerGetSliceCount();
+    pn532_irq_pin = !gpio_get(PN532_IRQ_PIN);
+    if(got_one == false){
+        if(pn532_irq_pin){
+            waitCount = TimerGetSliceCount() + 100;
+            got_one = true;
+            //The device wants to talk to us about something
+            pn532_readPassiveTargetID_recieve(uid);
+            //Need to verify which uid we got but we should probably do it next cycle
+            //RFID_Flag = 1;
+            Current_Die = (uid[0] << 24) | (uid[1] << 16) | (uid[2] << 8) | (uid[3]);
+            RFID_Flag = 1;
+        }
+    }else{
+        if(waitCount <= sliceCount){
+            pn532_readPassiveTargetID_send(0);
+            got_one = false;
+        }
     }
 }
 
@@ -119,6 +132,15 @@ uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len){
 //Read handles both waits
 void pn532_read(uint8_t *buffer, size_t len){
     uint8_t ret = 0;
+
+    //Do the read and return through buffer
+    while(!pn532_isReady()){
+    }
+    i2c_read_blocking(i2c_default, I2CADDR, buffer, len, false);
+
+    /*
+    Old version. Saving just in case for a minute
+    uint8_t ret = 0;
     if(pn532_read_ACK() == 0){
         //Do the read and return through buffer
         while(!pn532_isReady()){
@@ -127,6 +149,7 @@ void pn532_read(uint8_t *buffer, size_t len){
     }else{
         //I don't know what to do but I needed to get rid of the ACK
     }
+    */
 }
 
 void pn532_SAMConfig(void){
@@ -134,6 +157,7 @@ void pn532_SAMConfig(void){
     uint8_t buf1[] = {0x01, 0x14, 0x01};
     uint8_t buf2[8];
     pn532_send(PN532_COMMAND_SAMCONFIGURATION, buf1, 4);
+    pn532_read_ACK();
 
     pn532_read(buf2, 8);
 }
@@ -142,6 +166,7 @@ void pn532_readPassiveTargetID_send(uint8_t cardbaudrate){
     uint8_t buf[] = {1, cardbaudrate};
 
     pn532_send(PN532_COMMAND_INLISTPASSIVETARGET, buf, 3);
+    pn532_read_ACK();
 }
 
 

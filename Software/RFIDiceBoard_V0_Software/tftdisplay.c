@@ -5,6 +5,8 @@
 #include "tftdisplay.h"
 #include "pico/sync.h"
 #include "timer.h"
+#include "pn532.h"
+#include "rand_gen.h"
 
 //private Function declarations
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes);
@@ -158,8 +160,10 @@ void TFTDisplayTask(void){
     uint8_t button_num_str[] = {0, 0, 0, 0, 0};
     uint8_t test_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint8_t magnitude = 0;
+    uint8_t randnum;
     static uint32_t count = 0;
     static uint32_t test_num = 0;
+    static uint32_t test_num2 = 0;
 
     critical_section_enter_blocking(&crit_section); 
     //drawString("button Flag changes  ", 1, 11, 0xFFFF, 0x0000);
@@ -212,8 +216,43 @@ void TFTDisplayTask(void){
         default:
         break;
         }
+        ADC_Flag = 0;
     }else if(RFID_Flag != 0){
-        drawString("RFID Detection", 5, 29, 0xFFFF, 0x0000);
+        switch(Current_Die){
+        case D4UID:
+            //
+            randnum = (RandGen_GetRand32bit() % 4) + 1;
+            numToString(randnum, test_str, getMagnitude(randnum) + 2);
+            
+            drawString("D4  ", 5, 39, 0xFFFF, 0x0000);
+            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
+            break;
+        case D6UID:
+            randnum = (RandGen_GetRand32bit() % 6) + 1;
+            numToString(randnum, test_str, getMagnitude(randnum) + 2);
+            
+            drawString("D6 ", 5, 39, 0xFFFF, 0x0000);
+            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
+            break;
+        case D8UID:
+            randnum = (RandGen_GetRand32bit() % 8) + 1;
+            numToString(randnum, test_str, getMagnitude(randnum) + 2);
+            
+            drawString("D8  ", 5, 39, 0xFFFF, 0x0000);
+            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
+            break;
+        case D10UID:
+            randnum = (RandGen_GetRand32bit() % 10) + 1;
+            numToString(randnum, test_str, getMagnitude(randnum) + 2);
+            
+            drawString("D10 ", 5, 39, 0xFFFF, 0x0000);
+            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
+            break;
+        default:
+            //A uid is here that we don't recognize
+            break;
+        }
+        RFID_Flag = 0;
     }else{}
     critical_section_exit(&crit_section);
 

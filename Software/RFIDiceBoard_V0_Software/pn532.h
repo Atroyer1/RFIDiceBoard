@@ -3,6 +3,14 @@ void pn532_init(void);
 
 #define PN532_IRQ_PIN 3
 
+#define D4UID 306399841
+#define D6UID 0xf2522b61
+#define D8UID 1386753121
+#define D10UID 1387080801
+#define D12UID 2
+#define D20UID 2
+#define D100UID 2
+
 #define PN532_PREAMBLE (uint8_t)0x00   // Command sequence start, byte 1/3
 #define PN532_STARTCODE1 (uint8_t)0x00 // Command sequence start, byte 2/3
 #define PN532_STARTCODE2 (uint8_t)0xFF // Command sequence start, byte 3/3

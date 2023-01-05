@@ -9,7 +9,7 @@ uint32_t s1 = 100;
 uint32_t s2 = 100;
 uint32_t s3 = 100;
 
-uint32_t rand_gen_get_rand(){
+uint32_t RandGen_GetRand32bit(void){
     s1 = s1 | (random_32_bit_gen());
     s2 = s2 | (random_32_bit_gen());
     s3 = s3 | (random_32_bit_gen());
