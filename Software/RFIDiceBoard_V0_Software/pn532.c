@@ -57,23 +57,21 @@ void pn532_init(void){
 
 void RFID_Task(void){
     uint8_t uid[4];
-    uint32_t number_uid;
     bool volatile pn532_irq_pin;
     static bool got_one;
     static uint32_t waitCount;
     uint32_t sliceCount;
-    //uint32_t const lookupDie[7] = {D4UID, D6UID, D8UID, D10UID, D12UID, D20UID, D100UID};
     
     sliceCount = TimerGetSliceCount();
     pn532_irq_pin = !gpio_get(PN532_IRQ_PIN);
     if(got_one == false){
         if(pn532_irq_pin){
+            //The pn532 is ready
+            //waitCount pauses for 100 time slices (10ms * 100) before telling the 
+            //  pn532 to try to read uid again
             waitCount = TimerGetSliceCount() + 100;
             got_one = true;
-            //The device wants to talk to us about something
             pn532_readPassiveTargetID_recieve(uid);
-            //Need to verify which uid we got but we should probably do it next cycle
-            //RFID_Flag = 1;
             Current_Die = (uid[0] << 24) | (uid[1] << 16) | (uid[2] << 8) | (uid[3]);
             RFID_Flag = 1;
         }

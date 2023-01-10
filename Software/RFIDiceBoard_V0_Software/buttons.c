@@ -23,28 +23,51 @@ void button_init(void){
     critical_section_init(&crit_section_buttons);
 }
 
-void Debounce_Btn(uint8_t btn_num){
-    static uint8_t count = 0;
-    if(Debounce_Flag == 1){
-        count++;
-    }else{
-        count = 0;
-    }
-    if(count >= 20){
-        count = 0;
-        Button_Flag = 1;
-        //BUTTON Press verified
-    }
-}
-
 //Currently only works for one button
 void Button_Task(void){
     volatile bool btn1; 
+    volatile uint32_t btn_flags;
     static SW_STATE_T sw_state;
     
     critical_section_enter_blocking(&crit_section_buttons);
-    btn1 = !gpio_get(BTN1_PIN);
+    
+    //btn1 = !gpio_get(BTN1_PIN);
+
+    btn_flags = (~(gpio_get_all())) & BTN_MASK;
+        
     critical_section_exit(&crit_section_buttons);
+    switch(sw_state){
+    case SW_OFF:
+        if(btn_flags != 0){
+            sw_state = SW_EDGE;
+        }else{}
+        break;
+    case SW_EDGE:
+        if(btn_flags != 0){
+            sw_state = SW_VERF;
+            for(uint8_t i = 6; i <= 29; i++){
+                if(((btn_flags >> i) & 1) == 0b1){
+                    Button_Flag = i;
+                    i = 30;
+                }
+            }
+            if(Button_Flag == 0){
+                Button_Flag = 1;
+            }
+            //Button_Flag = btn_flags;
+        }else{
+            sw_state = SW_OFF;
+        }
+        break;
+    case SW_VERF:
+        if(!btn_flags){
+            sw_state = SW_OFF;
+        }else{}
+        break;
+    default:
+        sw_state = SW_OFF;
+    }
+/***********
     switch(sw_state){
     case SW_OFF:
         if(btn1){
@@ -67,6 +90,7 @@ void Button_Task(void){
     default:
         sw_state = SW_OFF;
     }
+***********/
 }
 
 /*

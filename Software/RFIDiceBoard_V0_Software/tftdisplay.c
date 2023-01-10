@@ -20,6 +20,8 @@ uint8_t string_length(uint8_t *string);
 uint32_t decodeToPixelMap(uint8_t ch);
 uint32_t getMagnitude(uint32_t num);
 
+void tft_menu_print(void);
+
 //Getters and setters
 void cs_select(void);
 void cs_deselect(void);
@@ -30,79 +32,75 @@ void rst_deselect(void);
 
 critical_section_t crit_section;
 
-/************************************************************************************/
-//Display initialization commands stored in an array for easy step-through
-//
-//TODO figure out how to store this somewhere else. I don't believe this needs to be a static const
-//     Ask Alex how he would store something like this
-static const uint8_t 
-    init_commands[] = {
-    21,                         //21 commands in this initialization
-    SWRESET, ST_CMD_DELAY,
-    150,
-    SLPOUT, ST_CMD_DELAY,
-    255,
-    FRMCTR1, 3,
-    0x01, 0x2C, 0x2D,
-    FRMCTR2, 3,
-    0x01, 0x2C, 0x2D,
-    FRMCTR3, 6,
-    0x01, 0x2C, 0x2D,
-    0x01, 0x2C, 0x2D,
-    INVCTR, 1,
-    0x07,
-    PWCTR1, 3,
-    0xA2,
-    0x02,
-    0x84,
-    PWCTR2, 1,
-    0xC5,
-    PWCTR3, 2,
-    0x0A,
-    0x00,
-    PWCTR4, 2,
-    0x8A,
-    0x2A,
-    PWCTR5, 2,
-    0x8A, 0xEE,
-    VMCTR1, 1,
-    0x0E,    
-    INVOFF, 0,
-    MADCTL, 1,
-    0xC8,
-    COLMOD, 1,
-    0x05,
-    CASET, 4,
-    0x00, 0x00,
-    0x00, 0x7F,
-    RASET, 4,
-    0x00, 0x00,
-    0x00, 0x7F,
-    GMCTRP1, 16,
-    0x02, 0x1c, 0x07, 0x12,
-    0x37, 0x32, 0x29, 0x2d,
-    0x29, 0x25, 0x2B, 0x39,
-    0x00, 0x01, 0x03, 0x10,
-    GMCTRN1, 16,
-    0x03, 0x1d, 0x07, 0x06,
-    0x2E, 0x2C, 0x29, 0x2D,
-    0x2E, 0x2E, 0x37, 0x3F,
-    0x00, 0x00, 0x02, 0x10,
-    NORON, ST_CMD_DELAY,
-    10,
-    DISPON, ST_CMD_DELAY,
-    100
-};
-
-/************************************************************************************/
 
 //initialization
 void tft_init(void){
-    const uint8_t *l_addr = init_commands;
     uint8_t numCommands;
     uint8_t cmd;
     uint8_t numArgs;
     uint16_t ms;
+    
+    //Display initialization commands stored in an array for easy step-through
+    static const uint8_t 
+        init_commands[] = {
+        21,                         //21 commands in this initialization
+        SWRESET, ST_CMD_DELAY,
+        150,
+        SLPOUT, ST_CMD_DELAY,
+        255,
+        FRMCTR1, 3,
+        0x01, 0x2C, 0x2D,
+        FRMCTR2, 3,
+        0x01, 0x2C, 0x2D,
+        FRMCTR3, 6,
+        0x01, 0x2C, 0x2D,
+        0x01, 0x2C, 0x2D,
+        INVCTR, 1,
+        0x07,
+        PWCTR1, 3,
+        0xA2,
+        0x02,
+        0x84,
+        PWCTR2, 1,
+        0xC5,
+        PWCTR3, 2,
+        0x0A,
+        0x00,
+        PWCTR4, 2,
+        0x8A,
+        0x2A,
+        PWCTR5, 2,
+        0x8A, 0xEE,
+        VMCTR1, 1,
+        0x0E,    
+        INVOFF, 0,
+        MADCTL, 1,
+        0xC8,
+        COLMOD, 1,
+        0x05,
+        CASET, 4,
+        0x00, 0x00,
+        0x00, 0x7F,
+        RASET, 4,
+        0x00, 0x00,
+        0x00, 0x7F,
+        GMCTRP1, 16,
+        0x02, 0x1c, 0x07, 0x12,
+        0x37, 0x32, 0x29, 0x2d,
+        0x29, 0x25, 0x2B, 0x39,
+        0x00, 0x01, 0x03, 0x10,
+        GMCTRN1, 16,
+        0x03, 0x1d, 0x07, 0x06,
+        0x2E, 0x2C, 0x29, 0x2D,
+        0x2E, 0x2E, 0x37, 0x3F,
+        0x00, 0x00, 0x02, 0x10,
+        NORON, ST_CMD_DELAY,
+        10,
+        DISPON, ST_CMD_DELAY,
+        100
+    };
+
+    const uint8_t *l_addr = init_commands;
 
     spi_init(spi_default, 32000000);
 
@@ -151,7 +149,24 @@ void tft_init(void){
     }
 
     critical_section_init(&crit_section);
+    tft_menu_print();
+}
+
+void tft_menu_print(void){
     drawBackground(0x0000);
+    
+    drawString("Up Down to increase", 5, 11, 0xFFFF, 0x0000);
+    drawString("and decrease num of", 5, 17, 0xFFFF, 0x0000);
+    drawString("dice rolled", 5, 23, 0xFFFF, 0x0000);
+
+    drawString("Left right to ", 5, 35, 0xFFFF, 0x0000);
+    drawString("subtract and add 1 ", 5, 41, 0xFFFF, 0x0000);
+    drawString("to the final rolled", 5, 47, 0xFFFF, 0x0000);
+    drawString("number", 5, 53, 0xFFFF, 0x0000);
+
+    drawString("Number of Dice 1", 5, 89, 0xFFFF, 0x0000);
+    drawString("Add  ", 5, 95, 0xFFFF, 0x0000);
+
 }
 
 //Do I need to make a state machine here? Nah. Lets just set up some global flags
@@ -160,44 +175,48 @@ void TFTDisplayTask(void){
     uint8_t button_num_str[] = {0, 0, 0, 0, 0};
     uint8_t test_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint8_t magnitude = 0;
+    static bool negative_PlusMinusFlag = false;
+    int32_t sum;
     uint8_t randnum;
+    static uint16_t blink_clr = 0xFFFF;
     static uint32_t count = 0;
     static uint32_t test_num = 0;
     static uint32_t test_num2 = 0;
 
     critical_section_enter_blocking(&crit_section); 
-    //drawString("button Flag changes  ", 1, 11, 0xFFFF, 0x0000);
-    //drawString("up button for menu   ", 1, 80, 0xFFFF, 0x0000);
-    //count ++;
-    //test_str[0] = (count % 10) + '0';
-    //count = count % 10000000;
+    
     count = TimerGetSliceCount();
-    if((count % 20) <= 10){
-        drawString("?", 5, 5, 0xFFFF, 0x0000);
-    }else{
-        drawString(" ", 5, 5, 0xFFFF, 0x0000);
-    }
 
-    /*
-    magnitude = getMagnitude(Button_Flag);
-    numToString(count, test_str, magnitude + 2);
-    drawString("Slice Count          ", 5, 80, 0xFFFF, 0x0000);
-
-    //drawString("                     ", 5, 86, 0xFFFF, 0x0000);
-    drawString(test_str, 5, 86, 0xFFFF, 0x0000);
-    */
 
     //Button check
     if(Button_Flag != 0){
-        if(test_num == 0){
-            drawString("Button 1 pressed", 5, 11, 0xFFFF, 0x0000);
-            test_num = count + 100;
-        }else if(test_num <= count){
-            drawString("                ", 5, 11, 0xFFFF, 0x0000);
-            Button_Flag = 0;
-            test_num = 0;
-        }else{}
-        
+        if(Button_Flag == 5){
+            tft_menu_print();        
+        }
+        blink_clr = 0xF0F0;
+
+        numToString(NumberOfDice, test_str, getMagnitude(NumberOfDice) + 2);
+        drawString(" ", (16*6), 89, 0xFFFF, 0x0000);
+        drawString(test_str, (16*6), 89, 0xFFFF, 0x0000);
+
+        //PlusMinus can be negative so flipping to positive if necesary
+        if(PlusMinus < 0){
+            PlusMinus = -PlusMinus;
+            negative_PlusMinusFlag = true;
+        }else{
+            negative_PlusMinusFlag = false;
+        }
+        numToString((uint16_t)PlusMinus, test_str, getMagnitude(PlusMinus) + 2);
+        drawString("    ", (4*6), 95, 0xFFFF, 0x0000);
+        if(negative_PlusMinusFlag == true){ 
+            PlusMinus = -PlusMinus;
+            drawString("-", (5*6), 95, 0xFFFF, 0x0000);
+            drawString(test_str, (6*6), 95, 0xFFFF, 0x0000);
+        }else{
+            drawString(test_str, (5*6), 95, 0xFFFF, 0x0000);
+        }
+
+        Button_Flag = 0;
     //ADC check
     }else if(ADC_Flag != 0){
         switch(Batt_State){
@@ -217,42 +236,79 @@ void TFTDisplayTask(void){
         break;
         }
         ADC_Flag = 0;
+    //RFID check
     }else if(RFID_Flag != 0){
-        switch(Current_Die){
-        case D4UID:
-            //
-            randnum = (RandGen_GetRand32bit() % 4) + 1;
-            numToString(randnum, test_str, getMagnitude(randnum) + 2);
-            
-            drawString("D4  ", 5, 39, 0xFFFF, 0x0000);
-            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
-            break;
-        case D6UID:
-            randnum = (RandGen_GetRand32bit() % 6) + 1;
-            numToString(randnum, test_str, getMagnitude(randnum) + 2);
-            
-            drawString("D6 ", 5, 39, 0xFFFF, 0x0000);
-            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
-            break;
-        case D8UID:
-            randnum = (RandGen_GetRand32bit() % 8) + 1;
-            numToString(randnum, test_str, getMagnitude(randnum) + 2);
-            
-            drawString("D8  ", 5, 39, 0xFFFF, 0x0000);
-            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
-            break;
-        case D10UID:
-            randnum = (RandGen_GetRand32bit() % 10) + 1;
-            numToString(randnum, test_str, getMagnitude(randnum) + 2);
-            
-            drawString("D10 ", 5, 39, 0xFFFF, 0x0000);
-            drawString(test_str, 5, 45, 0xFFFF, 0x0000);
-            break;
-        default:
-            //A uid is here that we don't recognize
-            break;
+        sum = 0;
+        for(uint8_t i = NumberOfDice; i > 0; i--){
+            switch(Current_Die){
+            case D4UID:
+                //
+                randnum = (RandGen_GetRand32bit() % 4) + 1;
+                sum += randnum;
+                numToString(randnum, test_str, getMagnitude(randnum) + 2);
+                
+                drawString("D4  ", 5, 59, 0xFFFF, 0x0000);
+                break;
+            case D6UID:
+                randnum = (RandGen_GetRand32bit() % 6) + 1;
+                sum += randnum;
+                numToString(randnum, test_str, getMagnitude(randnum) + 2);
+                
+                drawString("D6 ", 5, 59, 0xFFFF, 0x0000);
+                break;
+            case D8UID:
+                randnum = (RandGen_GetRand32bit() % 8) + 1;
+                sum += randnum;
+                numToString(randnum, test_str, getMagnitude(randnum) + 2);
+                
+                drawString("D8  ", 5, 59, 0xFFFF, 0x0000);
+                break;
+            case D10UID:
+                randnum = (RandGen_GetRand32bit() % 10) + 1;
+                sum += randnum;
+                numToString(randnum, test_str, getMagnitude(randnum) + 2);
+                
+                drawString("D10 ", 5, 59, 0xFFFF, 0x0000);
+                //This needs to be special
+                //drawString(test_str, ((i*8)), 65, 0xFFFF, 0x0000);
+                break;
+            default:
+                randnum = (RandGen_GetRand32bit() % 100) + 1;
+                sum += randnum;
+                drawString("??? ", 5, 59, 0xFFFF, 0x0000);
+                //A uid is here that we don't recognize
+                break;
+            }
+            drawString(test_str, ((i*12)) - 6, 65, 0xFFFF, 0x0000);
         }
-        RFID_Flag = 0;
+            sum += PlusMinus;
+            if((NumberOfDice > 1) || (PlusMinus != 0)){
+                drawString("Sum is              ", 5, 71, 0xFFFF, 0x0000);
+                if(sum >= 0){
+                    numToString(sum, test_str, getMagnitude(sum) + 2);
+                    drawString(test_str, (8*6), 71, 0xFFFF, 0x0000);
+                }else{ //Negative
+                    sum = -sum;
+                    numToString((uint16_t)sum, test_str, getMagnitude(sum) + 2);
+                    
+                    drawString("-", (8*6), 71, 0xFFFF, 0x0000);
+                    drawString(test_str, (9*6), 71, 0xFFFF, 0x0000);
+                }
+            }else{
+                drawString("                    ", 5, 71, 0xFFFF, 0x0000);
+            }
+            RFID_Flag = 0;
+        
+    }else{}
+
+    //Blinking "cursor" so we know the device is still alive
+    if((count % 20) == 10){
+        drawString("?", 5, 5, blink_clr, 0x0000);
+        if(blink_clr != 0xFFFF){
+            blink_clr = 0xFFFF;
+        }
+    }else if((count % 20) == 0){
+        drawString(" ", 5, 5, 0xFFFF, 0x0000);
     }else{}
     critical_section_exit(&crit_section);
 
@@ -575,6 +631,9 @@ uint32_t decodeToPixelMap(uint8_t ch){
             break;
         case '9':
             ret = l_9;
+            break;
+        case '-':
+            ret = l_hyphen;
             break;
         default:
             ret = l_not_a_letter;
