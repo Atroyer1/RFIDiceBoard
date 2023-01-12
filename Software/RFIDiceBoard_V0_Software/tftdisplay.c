@@ -178,6 +178,10 @@ void TFTDisplayTask(void){
     static bool negative_PlusMinusFlag = false;
     int32_t sum;
     uint8_t randnum;
+    uint8_t modnum;
+    uint8_t randnum_x;
+    uint8_t randnum_y;
+    uint8_t spacing;
     static uint16_t blink_clr = 0xFFFF;
     static uint32_t count = 0;
     static uint32_t test_num = 0;
@@ -196,7 +200,7 @@ void TFTDisplayTask(void){
         blink_clr = 0xF0F0;
 
         numToString(NumberOfDice, test_str, getMagnitude(NumberOfDice) + 2);
-        drawString(" ", (16*6), 89, 0xFFFF, 0x0000);
+        drawString("  ", (16*6), 89, 0xFFFF, 0x0000);
         drawString(test_str, (16*6), 89, 0xFFFF, 0x0000);
 
         //PlusMinus can be negative so flipping to positive if necesary
@@ -238,6 +242,94 @@ void TFTDisplayTask(void){
         ADC_Flag = 0;
     //RFID check
     }else if(RFID_Flag != 0){
+        randnum_x = 5;
+        randnum_y = 65;
+        sum = 0;
+        drawString("                     ", 5, 65, 0xFFFF, 0x0000);
+        drawString("                     ", 5, 71, 0xFFFF, 0x0000);
+        for(uint8_t i = 0; i < NumberOfDice; i++){
+            switch(Current_Die){
+            case D4UID:
+                modnum = 4;
+                spacing = 12;
+                break;
+            case D6UID:
+                modnum = 6;
+                spacing = 12;
+                break;
+            case D8UID:
+                modnum = 8;
+                spacing = 12;
+                break;
+            case D10UID:
+                modnum = 10;
+                spacing = 18;
+                break;
+            case D12UID:
+                modnum = 12;
+                spacing = 18;
+                break;
+            case D20UID:
+                modnum = 20;
+                spacing = 18;
+                break;
+            case D100UID:
+                modnum = 100;
+                spacing = 24;
+                break;
+            default:
+                modnum = 0;
+                spacing = 12;
+                break;
+            }
+            randnum = (RandGen_GetRand32bit() % modnum) + 1;
+            sum+= randnum;
+            numToString(randnum, test_str, getMagnitude(randnum) + 2);
+
+            drawString(test_str, randnum_x, randnum_y, 0xFFFF, 0x0000);
+
+            //Adjust screen position for next random number
+            if(randnum < 10){
+                randnum_x += 12;
+            }else if(randnum < 100){
+                randnum_x += 18;
+            }else{
+                //randnum should be 100
+                randnum_x += 24;
+            }
+
+            //Check if the number is going to run off the screen
+            if((randnum_x + 24) > (WIDTH)){
+                randnum_x = 5;
+                randnum_y += 6;
+            }
+        }
+
+        //Displaing the sum (If we care about it)
+        sum += PlusMinus;
+        if((NumberOfDice > 1) || (PlusMinus != 0)){
+            drawString("Sum is              ", 5, 77, 0xFFFF, 0x0000);
+            //Negative check
+            if(sum >= 0){
+                numToString(sum, test_str, getMagnitude(sum) + 2);
+                drawString(test_str, (8*6), 77, 0xFFFF, 0x0000);
+            }else{ //Negative
+                sum = -sum;
+                numToString((uint16_t)sum, test_str, getMagnitude(sum) + 2);
+                
+                drawString("-", (8*6), 71, 0xFFFF, 0x0000);
+                drawString(test_str, (9*6), 77, 0xFFFF, 0x0000);
+            }
+        }else{
+            drawString("                    ", 5, 77, 0xFFFF, 0x0000);
+        }
+
+        drawString("D   ", 5, 59, 0xFFFF, 0x0000);
+        numToString(modnum, test_str, getMagnitude(modnum) + 2);
+        drawString(test_str, 11, 59, 0xFFFF, 0x0000);
+        RFID_Flag = 0;
+            
+        /*
         sum = 0;
         for(uint8_t i = NumberOfDice; i > 0; i--){
             switch(Current_Die){
@@ -298,6 +390,7 @@ void TFTDisplayTask(void){
                 drawString("                    ", 5, 71, 0xFFFF, 0x0000);
             }
             RFID_Flag = 0;
+        */
         
     }else{}
 
