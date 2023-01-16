@@ -1,6 +1,4 @@
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "pico/time.h"
 #include "main.h"
 #include "tftdisplay.h"
 #include "buttons.h"
@@ -9,10 +7,10 @@
 #include "adc.h"
 #include "timer.h"
 
-uint32_t Button_Flag;
 uint8_t ADC_Flag;
 uint8_t RFID_Flag;
 uint8_t Debounce_Flag;
+uint32_t Button_Flag;
 uint32_t Current_Die;
 
 void main(void){

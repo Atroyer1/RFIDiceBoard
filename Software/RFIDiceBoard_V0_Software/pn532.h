@@ -3,6 +3,7 @@ void pn532_init(void);
 
 #define PN532_IRQ_PIN 3
 
+//RFID Tag ids and associated to their die-sides
 #define D4UID 4//306399841
 #define D6UID 0xf2522b61
 #define D8UID 1386753121
@@ -11,14 +12,15 @@ void pn532_init(void);
 #define D20UID 3
 #define D100UID 306399841
 
+//codes required for pn532 packets
 #define PN532_PREAMBLE (uint8_t)0x00   // Command sequence start, byte 1/3
 #define PN532_STARTCODE1 (uint8_t)0x00 // Command sequence start, byte 2/3
 #define PN532_STARTCODE2 (uint8_t)0xFF // Command sequence start, byte 3/3
 #define PN532_POSTAMBLE (uint8_t)0x00  // EOD
-
 #define PN532_HOSTTOPN532 (uint8_t)0xD4 // Host-to-PN532
 #define PN532_PN532TOHOST (uint8_t)0xD5 // PN532-to-host
 
+//Commands for the pn532
 #define PN532_COMMAND_DIAGNOSE (0x00)              ///< Diagnose
 #define PN532_COMMAND_GETFIRMWAREVERSION (0x02)    ///< Get firmware version
 #define PN532_COMMAND_GETGENERALSTATUS (0x04)      ///< Get general status

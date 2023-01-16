@@ -7,9 +7,8 @@
 //Private functions
 void Debounce_Btn(uint8_t btn_num);
 
+//Private critical section variable
 critical_section_t crit_section_buttons;
-
-//Private variables
 
 void button_init(void){
     for(int i = BTN1_PIN; i <= BTN8_PIN; i++){
@@ -23,19 +22,17 @@ void button_init(void){
     critical_section_init(&crit_section_buttons);
 }
 
-//Currently only works for one button
+//Checks all states of the buttons, debounces current state, and sets the button 
+//  flag to the current button
 void Button_Task(void){
     volatile bool btn1; 
     volatile uint32_t btn_flags;
     static SW_STATE_T sw_state;
     
     critical_section_enter_blocking(&crit_section_buttons);
-    
-    //btn1 = !gpio_get(BTN1_PIN);
-
     btn_flags = (~(gpio_get_all())) & BTN_MASK;
-        
     critical_section_exit(&crit_section_buttons);
+
     switch(sw_state){
     case SW_OFF:
         if(btn_flags != 0){
@@ -45,6 +42,9 @@ void Button_Task(void){
     case SW_EDGE:
         if(btn_flags != 0){
             sw_state = SW_VERF;
+            //converting btn_flags from one-hot to the number of the button
+            //  Cancels the for loop on the first button to be detected
+            //  with buttons having priority of 1,2,3, etc. 
             for(uint8_t i = 6; i <= 29; i++){
                 if(((btn_flags >> i) & 1) == 0b1){
                     Button_Flag = i;
@@ -54,7 +54,6 @@ void Button_Task(void){
             if(Button_Flag == 0){
                 Button_Flag = 1;
             }
-            //Button_Flag = btn_flags;
         }else{
             sw_state = SW_OFF;
         }
@@ -67,34 +66,4 @@ void Button_Task(void){
     default:
         sw_state = SW_OFF;
     }
-/***********
-    switch(sw_state){
-    case SW_OFF:
-        if(btn1){
-            sw_state = SW_EDGE;
-        }else{}
-        break;
-    case SW_EDGE:
-        if(btn1){
-            sw_state = SW_VERF;
-            Button_Flag = 1;
-        }else{
-            sw_state = SW_OFF;
-        }
-        break;
-    case SW_VERF:
-        if(!btn1){
-            sw_state = SW_OFF;
-        }else{}
-        break;
-    default:
-        sw_state = SW_OFF;
-    }
-***********/
 }
-
-/*
-void button_gpio_irq_handler(uint gpio, uint32_t events){
-    Button_Flag = gpio - BTN1_PIN + 1;
-}
-*/

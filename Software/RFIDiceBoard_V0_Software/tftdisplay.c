@@ -3,7 +3,6 @@
 #include "adc.h"
 #include "main.h"
 #include "tftdisplay.h"
-#include "pico/sync.h"
 #include "timer.h"
 #include "pn532.h"
 #include "rand_gen.h"
@@ -15,6 +14,7 @@ void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t 
 void drawBackground(uint16_t color);
 uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16_t background);
 
+//Helper functions for string manipulation
 bool numToString(uint32_t num, uint8_t *ret_string, uint8_t ret_string_len);
 uint8_t string_length(uint8_t *string);
 uint32_t decodeToPixelMap(uint8_t ch);
@@ -30,8 +30,6 @@ void dc_deselect(void);
 void rst_select(void);
 void rst_deselect(void);
 
-critical_section_t crit_section;
-
 
 //initialization
 void tft_init(void){
@@ -41,6 +39,13 @@ void tft_init(void){
     uint16_t ms;
     
     //Display initialization commands stored in an array for easy step-through
+    //The array is organized in this pattern:
+    /*Number of commands
+      Command, length of data for command (Or a flag for length of delay),
+      data,
+      Command, ...,
+      ...,
+    */
     static const uint8_t 
         init_commands[] = {
         21,                         //21 commands in this initialization
@@ -100,8 +105,10 @@ void tft_init(void){
         100
     };
 
+    //Pointer to the commands
     const uint8_t *l_addr = init_commands;
 
+    //SDK initialization command
     spi_init(spi_default, 32000000);
 
     //SCK, TX, CSN, DC, and RS pin initalization
@@ -148,10 +155,10 @@ void tft_init(void){
         numCommands--;
     }
 
-    critical_section_init(&crit_section);
     tft_menu_print();
 }
 
+//Menu printing function to fix up the screen if the wire gets touched
 void tft_menu_print(void){
     drawBackground(0x0000);
     
@@ -166,13 +173,11 @@ void tft_menu_print(void){
 
     drawString("Number of Dice 1", 5, 89, 0xFFFF, 0x0000);
     drawString("Add  ", 5, 95, 0xFFFF, 0x0000);
-
 }
 
-//Do I need to make a state machine here? Nah. Lets just set up some global flags
-//  that this function checks to update numbers and words on the display
+//Handles all of the flags that other modules set when they want something
+//  changed or put on the tft display
 void TFTDisplayTask(void){
-    uint8_t button_num_str[] = {0, 0, 0, 0, 0};
     uint8_t test_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint8_t magnitude = 0;
     static bool negative_PlusMinusFlag = false;
@@ -181,16 +186,10 @@ void TFTDisplayTask(void){
     uint8_t modnum;
     uint8_t randnum_x;
     uint8_t randnum_y;
-    uint8_t spacing;
     static uint16_t blink_clr = 0xFFFF;
     static uint32_t count = 0;
-    static uint32_t test_num = 0;
-    static uint32_t test_num2 = 0;
 
-    critical_section_enter_blocking(&crit_section); 
-    
     count = TimerGetSliceCount();
-
 
     //Button check
     if(Button_Flag != 0){
@@ -221,6 +220,7 @@ void TFTDisplayTask(void){
         }
 
         Button_Flag = 0;
+
     //ADC check
     }else if(ADC_Flag != 0){
         switch(Batt_State){
@@ -251,35 +251,28 @@ void TFTDisplayTask(void){
             switch(Current_Die){
             case D4UID:
                 modnum = 4;
-                spacing = 12;
                 break;
             case D6UID:
                 modnum = 6;
-                spacing = 12;
                 break;
             case D8UID:
                 modnum = 8;
-                spacing = 12;
                 break;
             case D10UID:
                 modnum = 10;
-                spacing = 18;
                 break;
             case D12UID:
                 modnum = 12;
-                spacing = 18;
                 break;
             case D20UID:
                 modnum = 20;
-                spacing = 18;
                 break;
             case D100UID:
                 modnum = 100;
-                spacing = 24;
                 break;
             default:
+                //unidentified RFID tag
                 modnum = 0;
-                spacing = 12;
                 break;
             }
             randnum = (RandGen_GetRand32bit() % modnum) + 1;
@@ -288,7 +281,7 @@ void TFTDisplayTask(void){
 
             drawString(test_str, randnum_x, randnum_y, 0xFFFF, 0x0000);
 
-            //Adjust screen position for next random number
+            //Adjust screen position for next random number based on magnitude of number
             if(randnum < 10){
                 randnum_x += 12;
             }else if(randnum < 100){
@@ -317,7 +310,7 @@ void TFTDisplayTask(void){
                 sum = -sum;
                 numToString((uint16_t)sum, test_str, getMagnitude(sum) + 2);
                 
-                drawString("-", (8*6), 71, 0xFFFF, 0x0000);
+                drawString("-", (8*6), 77, 0xFFFF, 0x0000);
                 drawString(test_str, (9*6), 77, 0xFFFF, 0x0000);
             }
         }else{
@@ -329,72 +322,10 @@ void TFTDisplayTask(void){
         drawString(test_str, 11, 59, 0xFFFF, 0x0000);
         RFID_Flag = 0;
             
-        /*
-        sum = 0;
-        for(uint8_t i = NumberOfDice; i > 0; i--){
-            switch(Current_Die){
-            case D4UID:
-                //
-                randnum = (RandGen_GetRand32bit() % 4) + 1;
-                sum += randnum;
-                numToString(randnum, test_str, getMagnitude(randnum) + 2);
-                
-                drawString("D4  ", 5, 59, 0xFFFF, 0x0000);
-                break;
-            case D6UID:
-                randnum = (RandGen_GetRand32bit() % 6) + 1;
-                sum += randnum;
-                numToString(randnum, test_str, getMagnitude(randnum) + 2);
-                
-                drawString("D6 ", 5, 59, 0xFFFF, 0x0000);
-                break;
-            case D8UID:
-                randnum = (RandGen_GetRand32bit() % 8) + 1;
-                sum += randnum;
-                numToString(randnum, test_str, getMagnitude(randnum) + 2);
-                
-                drawString("D8  ", 5, 59, 0xFFFF, 0x0000);
-                break;
-            case D10UID:
-                randnum = (RandGen_GetRand32bit() % 10) + 1;
-                sum += randnum;
-                numToString(randnum, test_str, getMagnitude(randnum) + 2);
-                
-                drawString("D10 ", 5, 59, 0xFFFF, 0x0000);
-                //This needs to be special
-                //drawString(test_str, ((i*8)), 65, 0xFFFF, 0x0000);
-                break;
-            default:
-                randnum = (RandGen_GetRand32bit() % 100) + 1;
-                sum += randnum;
-                drawString("??? ", 5, 59, 0xFFFF, 0x0000);
-                //A uid is here that we don't recognize
-                break;
-            }
-            drawString(test_str, ((i*12)) - 6, 65, 0xFFFF, 0x0000);
-        }
-            sum += PlusMinus;
-            if((NumberOfDice > 1) || (PlusMinus != 0)){
-                drawString("Sum is              ", 5, 71, 0xFFFF, 0x0000);
-                if(sum >= 0){
-                    numToString(sum, test_str, getMagnitude(sum) + 2);
-                    drawString(test_str, (8*6), 71, 0xFFFF, 0x0000);
-                }else{ //Negative
-                    sum = -sum;
-                    numToString((uint16_t)sum, test_str, getMagnitude(sum) + 2);
-                    
-                    drawString("-", (8*6), 71, 0xFFFF, 0x0000);
-                    drawString(test_str, (9*6), 71, 0xFFFF, 0x0000);
-                }
-            }else{
-                drawString("                    ", 5, 71, 0xFFFF, 0x0000);
-            }
-            RFID_Flag = 0;
-        */
-        
     }else{}
 
     //Blinking "cursor" so we know the device is still alive
+    //Turns blue for one blink when a button input is detected
     if((count % 20) == 10){
         drawString("?", 5, 5, blink_clr, 0x0000);
         if(blink_clr != 0xFFFF){
@@ -403,24 +334,7 @@ void TFTDisplayTask(void){
     }else if((count % 20) == 0){
         drawString(" ", 5, 5, 0xFFFF, 0x0000);
     }else{}
-    critical_section_exit(&crit_section);
 
-}
-
-uint32_t getMagnitude(uint32_t num){
-    bool magCheck = false;
-    uint32_t num_l = num;
-    uint8_t magnitude = 0;
-
-    while(magCheck == false){
-        if((num_l) >= 10){
-            num_l = num_l/10;
-            magnitude++;
-        }else{
-            magCheck = true;
-        }
-    }
-    return magnitude;
 }
 
 //self-contained spi-write
@@ -518,7 +432,6 @@ void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t 
 //If the string fits it will return the length of the string.
 //If the string doesn't fit it will return 0
 uint8_t drawString(uint8_t *string, uint8_t x, uint8_t y, uint16_t color, uint16_t background){
-
     uint8_t ret;
     uint8_t l_x = x;
     uint8_t l_y = y;
@@ -735,7 +648,21 @@ uint32_t decodeToPixelMap(uint8_t ch){
     return ret;
 }
 
+uint32_t getMagnitude(uint32_t num){
+    bool magCheck = false;
+    uint32_t num_l = num;
+    uint8_t magnitude = 0;
 
+    while(magCheck == false){
+        if((num_l) >= 10){
+            num_l = num_l/10;
+            magnitude++;
+        }else{
+            magCheck = true;
+        }
+    }
+    return magnitude;
+}
 
 /*Setters*/
 void cs_select(void) {

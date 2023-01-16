@@ -1,4 +1,5 @@
 #include "pico/stdlib.h"
+#include "pico/sync.h"
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 #include "main.h"
@@ -8,6 +9,7 @@
 #define I2CADDR 0x24
 #define RST_PIN 2
 
+//Private functions
 uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len);
 void pn532_read(uint8_t *buffer, size_t len);
 void pn532_SAMConfig(void);
@@ -16,21 +18,16 @@ void pn532_readPassiveTargetID_recieve(uint8_t *uid);
 uint8_t pn532_read_ACK(void);
 uint8_t pn532_isReady(void);
 
-//void pn532_gpio_irq_handler(uint gpio, uint32_t events);
+//Critical Section variable
+critical_section_t crit_section_pn532;
 
-bool waiting_for_read;
-
+//Initialization for the pn532
 void pn532_init(void){
     //RP2040 getting ready
     gpio_init(RST_PIN);
     gpio_set_dir(RST_PIN, GPIO_OUT); 
-    /*
-    gpio_init(PN532_IRQ_PIN);
-    gpio_set_dir(PN532_IRQ_PIN, GPIO_IN); 
-    */
     gpio_set_function(PN532_IRQ_PIN, GPIO_FUNC_SIO);
     gpio_set_input_enabled(PN532_IRQ_PIN, true);
-    gpio_set_input_hysteresis_enabled(PN532_IRQ_PIN, false);
 
     //i2c init
     i2c_init(i2c_default, 100 * 1000);
@@ -39,6 +36,7 @@ void pn532_init(void){
     gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
     gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
     
+    //quick reset
     gpio_put(RST_PIN, 1);
     gpio_put(RST_PIN, 0);
     sleep_ms(400);
@@ -48,13 +46,20 @@ void pn532_init(void){
     //Setting the PN532 to be a card reader
     pn532_SAMConfig();
 
+    //Setting up to read UID's
     pn532_readPassiveTargetID_send(0x00);
-
-    //irq pin can now work after setting up for reading RFID tags
-    //gpio_set_irq_enabled_with_callback(PN532_IRQ_PIN, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
+    critical_section_init(&crit_section_pn532);
 }
 
-
+/***
+*RFID_Task
+*
+*   Checks if the IRQ pin has been pulled low by the pn532
+*       If it has been pulled low that means a tag is ready to be read
+*       Grabs the uid from the tag and puts it in the global variable Current_Die
+*   Once the IRQ pin has been pulled low it waits 100 time slices (1000 ms)
+*       to set the pn532 to read again
+***/
 void RFID_Task(void){
     uint8_t uid[4];
     bool volatile pn532_irq_pin;
@@ -63,7 +68,9 @@ void RFID_Task(void){
     uint32_t sliceCount;
     
     sliceCount = TimerGetSliceCount();
+    critical_section_enter_blocking(&crit_section_pn532);
     pn532_irq_pin = !gpio_get(PN532_IRQ_PIN);
+    critical_section_exit(&crit_section_pn532);
     if(got_one == false){
         if(pn532_irq_pin){
             //The pn532 is ready
@@ -83,16 +90,16 @@ void RFID_Task(void){
     }
 }
 
-//Okay
-//The idea here is that I am using a big 'ol buffer that is a set size so that I can send more than just commands
-/***************///The other idea here is that data always comes with a command.
+//private function that sends a command with optional data to the pn532
+//data can be as many as 56 bytes
+//len describes number of bytes for the command and data
 uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len){
     uint8_t ret;
     uint8_t buf[64];
     uint8_t checksum = PN532_STARTCODE2 + PN532_HOSTTOPN532 + command;
     int index = 7;
     
-    //Every i2c message to the pn532 needs at least 8 bytes for information framesk
+    //Every i2c message to the pn532 needs at least 8 bytes for information frames
     if(len > (64 - 8) || len < 0){
         ret = 0;
     }else{
@@ -113,7 +120,6 @@ uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len){
                 buf[index] = data[index - 7];
                 checksum += buf[index];
             }
-            //index++;
         }else{}
         //Checksum
         buf[index] = ~checksum;
@@ -129,29 +135,16 @@ uint8_t pn532_send(uint8_t command, uint8_t *data, size_t len){
 
 //Read handles both waits
 void pn532_read(uint8_t *buffer, size_t len){
-    uint8_t ret = 0;
-
-    //Do the read and return through buffer
+    //Wait just in case the pn532 is not ready to be read from yet
     while(!pn532_isReady()){
     }
+    //Do the read and return through buffer
     i2c_read_blocking(i2c_default, I2CADDR, buffer, len, false);
-
-    /*
-    Old version. Saving just in case for a minute
-    uint8_t ret = 0;
-    if(pn532_read_ACK() == 0){
-        //Do the read and return through buffer
-        while(!pn532_isReady()){
-        }
-        i2c_read_blocking(i2c_default, I2CADDR, buffer, len, false);
-    }else{
-        //I don't know what to do but I needed to get rid of the ACK
-    }
-    */
 }
 
+//Configure the Security access module's setings
 void pn532_SAMConfig(void){
-                   //Command, normal mode, timeout 50ms*20 = 1 second, use IRQ pin
+    //Command, normal mode, timeout 50ms*20 = 1 second, use IRQ pin
     uint8_t buf1[] = {0x01, 0x14, 0x01};
     uint8_t buf2[8];
     pn532_send(PN532_COMMAND_SAMCONFIGURATION, buf1, 4);
@@ -160,6 +153,7 @@ void pn532_SAMConfig(void){
     pn532_read(buf2, 8);
 }
 
+//Tell the pn532 to wait around for a passive card to read
 void pn532_readPassiveTargetID_send(uint8_t cardbaudrate){
     uint8_t buf[] = {1, cardbaudrate};
 
@@ -167,7 +161,7 @@ void pn532_readPassiveTargetID_send(uint8_t cardbaudrate){
     pn532_read_ACK();
 }
 
-
+//Read the uid from a passive card
 void pn532_readPassiveTargetID_recieve(uint8_t *uid){
     uint8_t returnbuf[20];
 
@@ -178,6 +172,7 @@ void pn532_readPassiveTargetID_recieve(uint8_t *uid){
     
 }
 
+//Reads the acknowledge frame
 //Returns 0 if no issues
 //Returns 1 if ACK failed
 uint8_t pn532_read_ACK(void){
@@ -198,7 +193,7 @@ uint8_t pn532_read_ACK(void){
     return ret;
 }
 
-//IRQ pin gets pulled low when the PN532 is ready with something
+//IRQ pin gets pulled low when the PN532 is ready to say something back
 uint8_t pn532_isReady(void){
     return !gpio_get(PN532_IRQ_PIN);
 }

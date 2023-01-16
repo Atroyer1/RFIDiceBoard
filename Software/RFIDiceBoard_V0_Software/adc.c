@@ -7,8 +7,10 @@
 #include "timer.h"
 
 
+//Public state of the battery
 volatile BATTSTATE_T Batt_State;
-repeating_timer_t battery_timer;
+
+//private critical section variable
 critical_section_t crit_section_adc;
 
 void adc_initialize(void){
@@ -22,8 +24,9 @@ void adc_initialize(void){
     critical_section_init(&crit_section_adc);
 }
 
+//Checks the current state of the battery once a second and updates Batt_State accordingly
 void Adc_Task(void){
-    static BATTSTATE_T prev_Batt_State = 20; //Set to a number that Batt_State can't reach
+    static BATTSTATE_T prev_Batt_State = 20;
     static uint16_t prev_adc_value = 0;
     static volatile uint16_t adc_value = 100;
     static uint32_t sliceCount = 0;
