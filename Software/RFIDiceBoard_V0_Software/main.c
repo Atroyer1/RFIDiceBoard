@@ -13,6 +13,9 @@ uint8_t Debounce_Flag;
 uint32_t Button_Flag;
 uint32_t Current_Die;
 
+
+uint32_t TEST_num;
+
 void main(void){
 
     //initialization
@@ -20,7 +23,7 @@ void main(void){
     ADC_Flag = 0;
     RFID_Flag = 0;
     Current_Die = 0;
-    
+
     pn532_init();
     tft_init();
     adc_initialize();

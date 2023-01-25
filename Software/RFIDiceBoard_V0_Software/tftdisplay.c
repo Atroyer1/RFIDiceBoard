@@ -178,7 +178,7 @@ void tft_menu_print(void){
 //Handles all of the flags that other modules set when they want something
 //  changed or put on the tft display
 void TFTDisplayTask(void){
-    uint8_t test_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
+    uint8_t string[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint8_t magnitude = 0;
     static bool negative_PlusMinusFlag = false;
     int32_t sum;
@@ -198,9 +198,9 @@ void TFTDisplayTask(void){
         }
         blink_clr = 0xF0F0;
 
-        numToString(NumberOfDice, test_str, getMagnitude(NumberOfDice) + 2);
+        numToString(NumberOfDice, string, getMagnitude(NumberOfDice) + 2);
         drawString("  ", (16*6), 89, 0xFFFF, 0x0000);
-        drawString(test_str, (16*6), 89, 0xFFFF, 0x0000);
+        drawString(string, (16*6), 89, 0xFFFF, 0x0000);
 
         //PlusMinus can be negative so flipping to positive if necesary
         if(PlusMinus < 0){
@@ -209,14 +209,14 @@ void TFTDisplayTask(void){
         }else{
             negative_PlusMinusFlag = false;
         }
-        numToString((uint16_t)PlusMinus, test_str, getMagnitude(PlusMinus) + 2);
+        numToString((uint16_t)PlusMinus, string, getMagnitude(PlusMinus) + 2);
         drawString("    ", (4*6), 95, 0xFFFF, 0x0000);
         if(negative_PlusMinusFlag == true){ 
             PlusMinus = -PlusMinus;
             drawString("-", (5*6), 95, 0xFFFF, 0x0000);
-            drawString(test_str, (6*6), 95, 0xFFFF, 0x0000);
+            drawString(string, (6*6), 95, 0xFFFF, 0x0000);
         }else{
-            drawString(test_str, (5*6), 95, 0xFFFF, 0x0000);
+            drawString(string, (5*6), 95, 0xFFFF, 0x0000);
         }
 
         Button_Flag = 0;
@@ -242,6 +242,9 @@ void TFTDisplayTask(void){
         ADC_Flag = 0;
     //RFID check
     }else if(RFID_Flag != 0){
+        
+
+
         randnum_x = 5;
         randnum_y = 65;
         sum = 0;
@@ -277,9 +280,9 @@ void TFTDisplayTask(void){
             }
             randnum = (RandGen_GetRand32bit() % modnum) + 1;
             sum+= randnum;
-            numToString(randnum, test_str, getMagnitude(randnum) + 2);
+            numToString(randnum, string, getMagnitude(randnum) + 2);
 
-            drawString(test_str, randnum_x, randnum_y, 0xFFFF, 0x0000);
+            drawString(string, randnum_x, randnum_y, 0xFFFF, 0x0000);
 
             //Adjust screen position for next random number based on magnitude of number
             if(randnum < 10){
@@ -304,34 +307,33 @@ void TFTDisplayTask(void){
             drawString("Sum is              ", 5, 77, 0xFFFF, 0x0000);
             //Negative check
             if(sum >= 0){
-                numToString(sum, test_str, getMagnitude(sum) + 2);
-                drawString(test_str, (8*6), 77, 0xFFFF, 0x0000);
+                numToString(sum, string, getMagnitude(sum) + 2);
+                drawString(string, (8*6), 77, 0xFFFF, 0x0000);
             }else{ //Negative
                 sum = -sum;
-                numToString((uint16_t)sum, test_str, getMagnitude(sum) + 2);
+                numToString((uint16_t)sum, string, getMagnitude(sum) + 2);
                 
                 drawString("-", (8*6), 77, 0xFFFF, 0x0000);
-                drawString(test_str, (9*6), 77, 0xFFFF, 0x0000);
+                drawString(string, (9*6), 77, 0xFFFF, 0x0000);
             }
         }else{
             drawString("                    ", 5, 77, 0xFFFF, 0x0000);
         }
 
         drawString("D   ", 5, 59, 0xFFFF, 0x0000);
-        numToString(modnum, test_str, getMagnitude(modnum) + 2);
-        drawString(test_str, 11, 59, 0xFFFF, 0x0000);
+        numToString(modnum, string, getMagnitude(modnum) + 2);
+        drawString(string, 11, 59, 0xFFFF, 0x0000);
         RFID_Flag = 0;
-            
     }else{}
 
     //Blinking "cursor" so we know the device is still alive
     //Turns blue for one blink when a button input is detected
-    if((count % 20) == 10){
+    if((count % 50) == 25){
         drawString("?", 5, 5, blink_clr, 0x0000);
         if(blink_clr != 0xFFFF){
             blink_clr = 0xFFFF;
         }
-    }else if((count % 20) == 0){
+    }else if((count % 50) == 0){
         drawString(" ", 5, 5, 0xFFFF, 0x0000);
     }else{}
 
