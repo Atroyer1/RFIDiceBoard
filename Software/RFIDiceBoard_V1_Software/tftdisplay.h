@@ -9,12 +9,44 @@ void TFTDisplayTask(void);
 #define DC_PIN 21
 #define RS_PIN 20
 
+//Magic pixel distances
+#define HEIGHT 160
+#define WIDTH 128
+
+#define BTN_X_DIST 10
+#define BTN_Y_DIST 10
+#define BTN_SIDE_LEN 6
+#define BTN_START_POS_X (WIDTH/2) - (BTN_SIDE_LEN + BTN_X_DIST + (BTN_SIDE_LEN/2))
+#define BTN_START_POS_Y (HEIGHT/2) + 20
+
+#define BTN1_X1 (BTN_START_POS_X + BTN_X_DIST + BTN_SIDE_LEN)
+#define BTN1_X2 BTN1_X1 + BTN_SIDE_LEN
+#define BTN1_Y1 BTN_START_POS_Y
+#define BTN1_Y2 BTN1_Y1 + BTN_SIDE_LEN
+
+#define BTN2_X1 BTN_START_POS_X
+#define BTN2_X2 BTN2_X1 + BTN_SIDE_LEN
+#define BTN2_Y1 BTN_START_POS_Y + BTN_SIDE_LEN + BTN_Y_DIST
+#define BTN2_Y2 BTN2_Y1 + BTN_SIDE_LEN
+
+#define BTN3_X1 BTN_START_POS_X + BTN_X_DIST + BTN_SIDE_LEN
+#define BTN3_X2 BTN3_X1 + BTN_SIDE_LEN
+#define BTN3_Y1 BTN_START_POS_Y + BTN_SIDE_LEN + BTN_Y_DIST
+#define BTN3_Y2 BTN2_Y1 + BTN_SIDE_LEN
+
+#define BTN4_X1 BTN1_X2 + BTN_X_DIST
+#define BTN4_X2 BTN4_X1 + BTN_SIDE_LEN
+#define BTN4_Y1 BTN_START_POS_Y + BTN_SIDE_LEN + BTN_Y_DIST
+#define BTN4_Y2 BTN2_Y1 + BTN_SIDE_LEN
+
+#define BTN5_X1 BTN1_X1
+#define BTN5_X2 BTN1_X2
+#define BTN5_Y1 BTN3_Y2 + BTN_Y_DIST
+#define BTN5_Y2 BTN5_Y1 + BTN_SIDE_LEN
 
 //List of ST7735 Commands
 
 #define ST_CMD_DELAY 0x80
-#define HEIGHT 160
-#define WIDTH 128
 
 #define NOP 0x00
 #define SWRESET 0x01
