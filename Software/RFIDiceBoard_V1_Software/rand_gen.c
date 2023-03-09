@@ -82,16 +82,7 @@ void Rand_Task(void){
             }else{}
             break;
         case(BTN5_PIN):
-                //Lowest Right button
-            break;
-        case(BTN6_PIN):
-                //Second Lowest Right button
-            break;
-        case(BTN7_PIN):
-                //Third
-            break;
-        case(BTN8_PIN):
-                //Fourth
+                //Middle Button
             break;
         default:
             break;

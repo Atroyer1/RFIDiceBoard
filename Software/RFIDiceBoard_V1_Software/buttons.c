@@ -11,7 +11,7 @@ void Debounce_Btn(uint8_t btn_num);
 critical_section_t crit_section_buttons;
 
 void button_init(void){
-    for(int i = BTN1_PIN; i <= BTN8_PIN; i++){
+    for(int i = BTN1_PIN; i <= BTN5_PIN; i++){
         gpio_set_function(i, GPIO_FUNC_SIO);
         gpio_set_input_enabled(i, true);
         gpio_set_input_hysteresis_enabled(i, true);

@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "pn532.h"
 #include "rand_gen.h"
+#include "buttons.h"
 
 //private Function declarations
 void sendCommand(uint8_t cmdByte, const uint8_t *dataBytes, uint8_t numDataBytes);
@@ -25,7 +26,7 @@ uint32_t getMagnitude(uint32_t num);
 void tft_menu_print(void);
 void idleUpdate(int32_t sliceCnt, int16_t clr);
 void drawRectangle(uint8_t x_1, uint8_t x_2, uint8_t y_1, uint8_t y_2, uint16_t clr);
-void drawButtons(void);
+void drawButtons(uint8_t button_num);
 
 
 //Getters and setters
@@ -163,7 +164,15 @@ void tft_init(void){
 
     tft_menu_print();
     
-    drawButtons();
+    //drawButtons(6);
+
+    drawString("1", 5, 5, 0xFFFF, 0x0000, 1);
+    drawString("2", 5 + (6), 5, 0xFFFF, 0x0000, 2);
+    drawString("3", 5 + (6 * 3), 5, 0xFFFF, 0x0000, 3);
+    drawString("4", 5 + (6 * 6), 5, 0xFFFF, 0x0000, 4);
+    drawString("5", 5 + (6 * 10), 5, 0xFFFF, 0x0000, 5);
+    drawString("6", 5 + (6 * 15), 5, 0xFFFF, 0x0000, 6);
+    //drawString("1", 5, 5, 0xFFFF, 0x0000, 1);
     
     //drawRectangle(50, 55, 50, 58, 0xFFFF);
     /*
@@ -229,6 +238,9 @@ void TFTDisplayTask(void){
         if(Button_Flag == 5){
             tft_menu_print();        
         }
+
+        //TODO make it so drawButtons draws a Button in a different color when I want
+        drawButtons(Button_Flag);
         blink_clr = 0xF0F0;
 
         numToString(NumberOfDice, string, getMagnitude(NumberOfDice) + 2);
@@ -466,37 +478,52 @@ void drawBackground(uint16_t color){
 
 //The goal here is to draw four things that are shaped like the buttons
 //  on the PCB
-void drawButtons(void){
-    drawRectangle(BTN1_X1, BTN1_X2, BTN1_Y1, BTN1_Y2, 0xFFFF);
-    drawRectangle(BTN2_X1, BTN2_X2, BTN2_Y1, BTN2_Y2, 0xFFFF);
-    drawRectangle(BTN3_X1, BTN3_X2, BTN3_Y1, BTN3_Y2, 0xFFFF);
-    drawRectangle(BTN4_X1, BTN4_X2, BTN4_Y1, BTN4_Y2, 0xFFFF);
-    drawRectangle(BTN5_X1, BTN5_X2, BTN5_Y1, BTN5_Y2, 0xFFFF);
-    
-    drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y1 - 1 , BTN1_Y1 - 1, 0xFFFF);
-    drawRectangle(BTN1_X1 - 1, BTN1_X1 - 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN1_X2 + 1, BTN1_X2 + 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y2 + 1 , BTN1_Y2 + 1, 0xFFFF);
-
-    drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y1 - 1 , BTN2_Y1 - 1, 0xFFFF);
-    drawRectangle(BTN2_X1 - 1, BTN2_X1 - 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN2_X2 + 1, BTN2_X2 + 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y2 + 1 , BTN2_Y2 + 1, 0xFFFF);
-
-    drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y1 - 1 , BTN3_Y1 - 1, 0xFFFF);
-    drawRectangle(BTN3_X1 - 1, BTN3_X1 - 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN3_X2 + 1, BTN3_X2 + 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y2 + 1 , BTN3_Y2 + 1, 0xFFFF);
-
-    drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y1 - 1 , BTN4_Y1 - 1, 0xFFFF);
-    drawRectangle(BTN4_X1 - 1, BTN4_X1 - 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN4_X2 + 1, BTN4_X2 + 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y2 + 1 , BTN4_Y2 + 1, 0xFFFF);
-
-    drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y1 - 1 , BTN5_Y1 - 1, 0xFFFF);
-    drawRectangle(BTN5_X1 - 1, BTN5_X1 - 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN5_X2 + 1, BTN5_X2 + 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, 0xFFFF);
-    drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y2 + 1 , BTN5_Y2 + 1, 0xFFFF);
+void drawButtons(uint8_t button_num){
+    //BTN1
+    switch(button_num){
+        case(BTN1_PIN):
+            drawRectangle(BTN1_X1, BTN1_X2, BTN1_Y1, BTN1_Y2, 0xFFFF);
+            drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y1 - 1 , BTN1_Y1 - 1, 0xFFFF);
+            drawRectangle(BTN1_X1 - 1, BTN1_X1 - 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN1_X2 + 1, BTN1_X2 + 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y2 + 1 , BTN1_Y2 + 1, 0xFFFF);
+            //Up
+            break;
+        case(BTN2_PIN):
+            //Left
+            drawRectangle(BTN2_X1, BTN2_X2, BTN2_Y1, BTN2_Y2, 0xFFFF);
+            drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y1 - 1 , BTN2_Y1 - 1, 0xFFFF);
+            drawRectangle(BTN2_X1 - 1, BTN2_X1 - 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN2_X2 + 1, BTN2_X2 + 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y2 + 1 , BTN2_Y2 + 1, 0xFFFF);
+            break;
+        case(BTN3_PIN):
+            //Down
+            drawRectangle(BTN5_X1, BTN5_X2, BTN5_Y1, BTN5_Y2, 0xFFFF);
+            drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y1 - 1 , BTN5_Y1 - 1, 0xFFFF);
+            drawRectangle(BTN5_X1 - 1, BTN5_X1 - 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN5_X2 + 1, BTN5_X2 + 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y2 + 1 , BTN5_Y2 + 1, 0xFFFF);
+            break;
+        case(BTN4_PIN):
+            //Right
+            drawRectangle(BTN4_X1, BTN4_X2, BTN4_Y1, BTN4_Y2, 0xFFFF);
+            drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y1 - 1 , BTN4_Y1 - 1, 0xFFFF);
+            drawRectangle(BTN4_X1 - 1, BTN4_X1 - 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN4_X2 + 1, BTN4_X2 + 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y2 + 1 , BTN4_Y2 + 1, 0xFFFF);
+            break;
+        case(BTN5_PIN):
+            //Lowest Right button
+            drawRectangle(BTN3_X1, BTN3_X2, BTN3_Y1, BTN3_Y2, 0xFFFF);
+            drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y1 - 1 , BTN3_Y1 - 1, 0xFFFF);
+            drawRectangle(BTN3_X1 - 1, BTN3_X1 - 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN3_X2 + 1, BTN3_X2 + 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, 0xFFFF);
+            drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y2 + 1 , BTN3_Y2 + 1, 0xFFFF);
+            break;
+        default:
+            break;
+    }
 }
 
 void drawLetter(uint32_t letter, uint8_t x, uint8_t y, uint16_t color, uint16_t background, uint8_t num_pix){
