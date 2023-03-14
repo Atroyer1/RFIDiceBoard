@@ -17,7 +17,7 @@ void TFTDisplayTask(void);
 #define BTN_Y_DIST 10
 #define BTN_SIDE_LEN 6
 #define BTN_START_POS_X (WIDTH/2) - (BTN_SIDE_LEN + BTN_X_DIST + (BTN_SIDE_LEN/2))
-#define BTN_START_POS_Y (HEIGHT/2) + 20
+#define BTN_START_POS_Y (HEIGHT/2) + 30
 
 #define BTN1_X1 (BTN_START_POS_X + BTN_X_DIST + BTN_SIDE_LEN)
 #define BTN1_X2 BTN1_X1 + BTN_SIDE_LEN

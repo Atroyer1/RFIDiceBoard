@@ -29,7 +29,7 @@ void main(void){
     //pn532_init();
     tft_init();
     //adc_initialize();
-    //button_init();
+    button_init();
     timer_init();
     //rand_init();
 
@@ -37,7 +37,7 @@ void main(void){
     while(1){
         TimerDelay(10u);
         //Adc_Task();
-        //Button_Task();
+        Button_Task();
         Rand_Task();
         //RFID_Task();
 

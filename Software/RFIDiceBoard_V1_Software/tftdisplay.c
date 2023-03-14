@@ -26,7 +26,7 @@ uint32_t getMagnitude(uint32_t num);
 void tft_menu_print(void);
 void idleUpdate(int32_t sliceCnt, int16_t clr);
 void drawRectangle(uint8_t x_1, uint8_t x_2, uint8_t y_1, uint8_t y_2, uint16_t clr);
-void drawButtons(uint8_t button_num);
+void drawButtons(uint8_t button_num, uint16_t clr);
 
 
 //Getters and setters
@@ -37,6 +37,11 @@ void dc_deselect(void);
 void rst_select(void);
 void rst_deselect(void);
 
+struct button_struct{
+    uint8_t number;
+    uint16_t color;
+    uint32_t count;
+};
 
 //initialization
 void tft_init(void){
@@ -164,14 +169,14 @@ void tft_init(void){
 
     tft_menu_print();
     
-    //drawButtons(6);
-
     drawString("1", 5, 5, 0xFFFF, 0x0000, 1);
     drawString("2", 5 + (6), 5, 0xFFFF, 0x0000, 2);
     drawString("3", 5 + (6 * 3), 5, 0xFFFF, 0x0000, 3);
     drawString("4", 5 + (6 * 6), 5, 0xFFFF, 0x0000, 4);
     drawString("5", 5 + (6 * 10), 5, 0xFFFF, 0x0000, 5);
     drawString("6", 5 + (6 * 15), 5, 0xFFFF, 0x0000, 6);
+
+
     //drawString("1", 5, 5, 0xFFFF, 0x0000, 1);
     
     //drawRectangle(50, 55, 50, 58, 0xFFFF);
@@ -197,6 +202,13 @@ void tft_init(void){
 //Menu printing function to fix up the screen if the wire gets touched
 void tft_menu_print(void){
     drawBackground(0x0000);
+
+    drawButtons(BTN1_PIN, 0xFFFF);
+    drawButtons(BTN2_PIN, 0xFFFF);
+    drawButtons(BTN3_PIN, 0xFFFF);
+    drawButtons(BTN4_PIN, 0xFFFF);
+    drawButtons(BTN5_PIN, 0xFFFF);
+
     /*
     
     drawString("Up Down to increase", 5, 11, 0xFFFF, 0x0000);
@@ -224,28 +236,61 @@ void TFTDisplayTask(void){
     uint8_t modnum;
     uint8_t randnum_x;
     uint8_t randnum_y;
-    static uint16_t blink_clr = 0xFFFF;
     static uint32_t count = 0;
+    static struct button_struct button[5] = {0};
+
+    //Initialize button struct
+    if(button[0].number == 0){
+        button[0].number = BTN1_PIN;
+        button[1].number = BTN2_PIN;
+        button[2].number = BTN3_PIN;
+        button[3].number = BTN4_PIN;
+        button[4].number = BTN5_PIN;
+        
+        for(uint8_t i = 0; i <= 4; i++){
+            button[i].color = 0xFFFF;
+            button[i].count = 0;
+        }
+    }
 
     count = TimerGetSliceCount();
 
     //Cursor update
+    idleUpdate(count, 0xFFFF);
+
+    //Initial old-task cleanup
+    
     
 
     //Time to check all the flags
     //Button check
     if(Button_Flag != 0){
-        if(Button_Flag == 5){
+        numToString(Button_Flag, string, getMagnitude(Button_Flag) + 2);
+        drawString(string, (4*6), 95, 0xFFFF, 0x0000, 2);
+        if(count > 500){
+            while(1){}
+        }
+    
+        for(uint8_t i = 0; i <= 4; i++){
+            if(Button_Flag == button[i].number){
+                //drawString("AAAHH", (4*6), 95, 0xFFFF, 0x0000, 1);
+                button[i].count = count + 250;
+                button[i].color = 0x0F0F;
+            }
+        }
+        
+        if(Button_Flag == BTN5_PIN){
             tft_menu_print();        
         }
 
         //TODO make it so drawButtons draws a Button in a different color when I want
-        drawButtons(Button_Flag);
-        blink_clr = 0xF0F0;
+        //drawButtons(Button_Flag, 0x0F0F);
 
+        /*
         numToString(NumberOfDice, string, getMagnitude(NumberOfDice) + 2);
         drawString("  ", (16*6), 89, 0xFFFF, 0x0000, 1);
         drawString(string, (16*6), 89, 0xFFFF, 0x0000, 1);
+        */
 
         //PlusMinus can be negative so flipping to positive if necesary
         if(PlusMinus < 0){
@@ -254,14 +299,16 @@ void TFTDisplayTask(void){
         }else{
             negative_PlusMinusFlag = false;
         }
+        /*
         numToString((uint16_t)PlusMinus, string, getMagnitude(PlusMinus) + 2);
         drawString("    ", (4*6), 95, 0xFFFF, 0x0000, 1);
+        */
         if(negative_PlusMinusFlag == true){ 
             PlusMinus = -PlusMinus;
-            drawString("-", (5*6), 95, 0xFFFF, 0x0000, 1);
-            drawString(string, (6*6), 95, 0xFFFF, 0x0000, 1);
+            //drawString("-", (5*6), 95, 0xFFFF, 0x0000, 1);
+            //drawString(string, (6*6), 95, 0xFFFF, 0x0000, 1);
         }else{
-            drawString(string, (5*6), 95, 0xFFFF, 0x0000, 1);
+            //drawString(string, (5*6), 95, 0xFFFF, 0x0000, 1);
         }
 
         Button_Flag = 0;
@@ -371,7 +418,6 @@ void TFTDisplayTask(void){
         RFID_Flag = 0;
     }else{}
 
-    idleUpdate(count, blink_clr);
 
 }
 
@@ -478,7 +524,7 @@ void drawBackground(uint16_t color){
 
 //The goal here is to draw four things that are shaped like the buttons
 //  on the PCB
-void drawButtons(uint8_t button_num){
+void drawButtons(uint8_t button_num, uint16_t clr){
     //BTN1
     switch(button_num){
         case(BTN1_PIN):
