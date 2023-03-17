@@ -4,13 +4,13 @@ void pn532_init(void);
 #define PN532_IRQ_PIN 3
 
 //RFID Tag ids and associated to their die-sides
-#define D4UID 4//306399841
+#define D4UID 0x1E780790
 #define D6UID 0xf2522b61
-#define D8UID 1386753121
-#define D10UID 1387080801
-#define D12UID 2
-#define D20UID 3
-#define D100UID 306399841
+#define D8UID 0x52a82c61
+#define D10UID 0x52ad2c61
+#define D12UID 0x7e540790
+#define D20UID 0x7e490090
+#define D100UID 0x12434a61
 
 //codes required for pn532 packets
 #define PN532_PREAMBLE (uint8_t)0x00   // Command sequence start, byte 1/3

@@ -44,6 +44,22 @@ void TFTDisplayTask(void);
 #define BTN5_Y1 BTN3_Y2 + BTN_Y_DIST
 #define BTN5_Y2 BTN5_Y1 + BTN_SIDE_LEN
 
+#define ONE_CHAR_PIXEL_SPACING 6
+
+//Battery pixel defines
+#define BATT_HEIGHT 10
+#define BATT_WIDTH 5
+#define BATT_X1 (WIDTH - 20)
+#define BATT_X2 (BATT_X1 + BATT_WIDTH)
+#define BATT_Y1 (HEIGHT - 20)
+#define BATT_Y2 (BATT_Y1 + BATT_HEIGHT)
+
+//modifier box pixel defines
+#define BOX_X1 BTN_START_POS_X - 43
+#define BOX_X2 BOX_X1 + 36
+#define BOX_Y1 BTN_START_POS_Y
+#define BOX_Y2 BOX_Y1 + 28
+
 //List of ST7735 Commands
 
 #define ST_CMD_DELAY 0x80
@@ -106,17 +122,20 @@ void TFTDisplayTask(void);
 #define GMCTRN1 0xE1
 
 //Pre-defined 565 colors
-#define ST77XX_BLACK 0x0000
-#define ST77XX_WHITE 0xFFFF
-#define ST77XX_RED 0xF800
-#define ST77XX_GREEN 0x07E0
-#define ST77XX_BLUE 0x001F
-#define ST77XX_CYAN 0x07FF
-#define ST77XX_MAGENTA 0xF81F
-#define ST77XX_YELLOW 0xFFE0
-#define ST77XX_ORANGE 0xFC00
+#define TFT_BLACK 0x0000
+#define TFT_WHITE 0xFFFF
+#define TFT_RED 0xF800
+#define TFT_GREEN 0x001F
+#define TFT_BLUE 0x07E0
 
-
+//Slightly bad colors
+#define TFT_CYAN 0x07FF
+#define TFT_MAGENTA 0xFFE0
+#define TFT_YELLOW 0xF81F
+#define TFT_ORANGE 0xF80F
+#define TFT_BRIGHT_GREEN TFT_RED + (TFT_GREEN)
+#define TFT_GREY (0x7c06)
+ 
 //Pixel letters defined in a 25 bit format
 
 #define l_A 0b0010001010011100101001010 
@@ -158,6 +177,8 @@ void TFTDisplayTask(void);
 #define l_9 0b0110010010011100001001100
 #define l_9 0b0110010010011100001001100
 #define l_hyphen 0b0000000000011100000000000
+#define l_plus 0b0000000100011100010000000
+#define l_colon 0b0000000100000000010000000
 
 #define l_space 0b0000000000000000000000000
 #define l_not_a_letter 0b1111111111111111111111111

@@ -24,6 +24,7 @@ uint32_t getMagnitude(uint32_t num);
 
 //private functions to print specific things
 void tft_menu_print(void);
+void tft_menu_instructions_update(void);
 void idleUpdate(int32_t sliceCnt, int16_t clr);
 void drawRectangle(uint8_t x_1, uint8_t x_2, uint8_t y_1, uint8_t y_2, uint16_t clr);
 void drawButtons(uint8_t button_num, uint16_t clr);
@@ -168,39 +169,13 @@ void tft_init(void){
     }
 
     tft_menu_print();
-    
-    drawString("1", 5, 5, 0xFFFF, 0x0000, 1);
-    drawString("2", 5 + (6), 5, 0xFFFF, 0x0000, 2);
-    drawString("3", 5 + (6 * 3), 5, 0xFFFF, 0x0000, 3);
-    drawString("4", 5 + (6 * 6), 5, 0xFFFF, 0x0000, 4);
-    drawString("5", 5 + (6 * 10), 5, 0xFFFF, 0x0000, 5);
-    drawString("6", 5 + (6 * 15), 5, 0xFFFF, 0x0000, 6);
 
-
-    //drawString("1", 5, 5, 0xFFFF, 0x0000, 1);
-    
-    //drawRectangle(50, 55, 50, 58, 0xFFFF);
-    /*
-    drawString("BIG LETTERS", 5, 5, 0xFFFF, 0x0000, 2);
-    drawString("HALEY", 5, 20, 0xFFFF, 0x0000, 3);
-    drawString("ZBD-0", 5, 50, 0xFFFF, 0x0000, 4);
-    drawString("WOO", 5, 70, 0xFFFF, 0x0000, 5);
-    drawString("WOO", 5, 120, 0xFFFF, 0x0000, 6);
-    */
-    
-    /*
-    drawBigLetter(decodeToPixelMap('A'), 5, 5, 0xFFFF, 0x0000, 1);
-    drawBigLetter(decodeToPixelMap('B'), 5 + 12, 5, 0xFFFF, 0x0000, 2);
-    drawBigLetter(decodeToPixelMap('C'), 5 + (12*2), 5, 0xFFFF, 0x0000, 2);
-    drawBigLetter(decodeToPixelMap('D'), 5 + (12*3), 5, 0xFFFF, 0x0000, 3);
-    drawBigLetter(decodeToPixelMap('D'), 5, 20, 0xFFFF, 0x0000, 4);
-
-    drawBigLetter(decodeToPixelMap('D'), 5, 60, 0xFFFF, 0x0000, 5);
-    */
 }
 
 //Menu printing function to fix up the screen if the wire gets touched
 void tft_menu_print(void){
+    const uint16_t boundary_color = TFT_BRIGHT_GREEN;
+
     drawBackground(0x0000);
 
     drawButtons(BTN1_PIN, 0xFFFF);
@@ -209,34 +184,171 @@ void tft_menu_print(void){
     drawButtons(BTN4_PIN, 0xFFFF);
     drawButtons(BTN5_PIN, 0xFFFF);
 
+    //Outline of numDice and plusMinus area
+
     /*
-    
-    drawString("Up Down to increase", 5, 11, 0xFFFF, 0x0000);
-    drawString("and decrease num of", 5, 17, 0xFFFF, 0x0000);
-    drawString("dice rolled", 5, 23, 0xFFFF, 0x0000);
-
-    drawString("Left right to ", 5, 35, 0xFFFF, 0x0000);
-    drawString("subtract and add 1 ", 5, 41, 0xFFFF, 0x0000);
-    drawString("to the final rolled", 5, 47, 0xFFFF, 0x0000);
-    drawString("number", 5, 53, 0xFFFF, 0x0000);
-
-    drawString("Number of Dice 1", 5, 89, 0xFFFF, 0x0000);
-    drawString("Add  ", 5, 95, 0xFFFF, 0x0000);
+    drawRectangle(BOX_X1, BOX_X2 + 16, BOX_Y1, BOX_Y1, 0xFFFF);
+    drawRectangle(BOX_X1, BOX_X2, BOX_Y2, BOX_Y2, 0xFFFF);
+    drawRectangle(BOX_X1, BOX_X1, BOX_Y1, BOX_Y2, 0xFFFF);
+    //drawRectangle(BOX_X2, BOX_X2, BOX_Y1, BOX_Y2, 0xFFFF);
+    drawRectangle(BOX_X2 + 16, BOX_X2 + 16, BOX_Y1, BOX_Y1 + 12, 0xFFFF);
+    drawRectangle(BOX_X2, BOX_X2 + 16, BOX_Y1 + 12, BOX_Y1 + 12, 0xFFFF);
+    drawRectangle(BOX_X2, BOX_X2, BOX_Y1 + 12, BOX_Y2, 0xFFFF);
     */
+
+    //Battery outline
+    drawRectangle(BATT_X1 + 1, BATT_X2 - 1, BATT_Y1 - 2, BATT_Y1 - 2, 0xffff);
+    drawRectangle(BATT_X1 - 1, BATT_X2 + 1, BATT_Y1 - 1, BATT_Y1 - 1, 0xffff);
+    drawRectangle(BATT_X1 - 1, BATT_X2 + 1, BATT_Y2 + 1, BATT_Y2 + 1, 0xffff);
+    drawRectangle(BATT_X1 - 1, BATT_X1 - 1, BATT_Y1 - 1, BATT_Y2 + 1, 0xffff);
+    drawRectangle(BATT_X2 + 1, BATT_X2 + 1, BATT_Y1 - 1, BATT_Y2 + 1, 0xffff);
+
+    //Outline of buttons
+    
+    //BTN1 outline
+    drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y1 - 2 , BTN1_Y1 - 2, boundary_color);
+    drawPixel(BTN1_X1 - 1, BTN1_Y1, boundary_color);
+    drawPixel(BTN1_X1, BTN1_Y1 - 1, boundary_color);
+    drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y2 + 2 , BTN1_Y2 + 2, boundary_color);
+    drawPixel(BTN1_X2 + 1, BTN1_Y1, boundary_color);
+    drawPixel(BTN1_X2, BTN1_Y1 - 1, boundary_color);
+    drawRectangle(BTN1_X1 - 2, BTN1_X1 - 2, BTN1_Y1 + 1 , BTN1_Y2 - 1, boundary_color);
+    drawPixel(BTN1_X2 + 1, BTN1_Y2, boundary_color);
+    drawPixel(BTN1_X2, BTN1_Y2 + 1, boundary_color);
+    drawRectangle(BTN1_X2 + 2, BTN1_X2 + 2, BTN1_Y1 + 1 , BTN1_Y2 - 1, boundary_color);
+    drawPixel(BTN1_X1 - 1, BTN1_Y2, boundary_color);
+    drawPixel(BTN1_X1, BTN1_Y2 + 1, boundary_color);
+
+    //2
+    drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y1 - 2 , BTN2_Y1 - 2, boundary_color);
+    drawPixel(BTN2_X1 - 1, BTN2_Y1, boundary_color);
+    drawPixel(BTN2_X1, BTN2_Y1 - 1, boundary_color);
+    drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y2 + 2 , BTN2_Y2 + 2, boundary_color);
+    drawPixel(BTN2_X2 + 1, BTN2_Y1, boundary_color);
+    drawPixel(BTN2_X2, BTN2_Y1 - 1, boundary_color);
+    drawRectangle(BTN2_X1 - 2, BTN2_X1 - 2, BTN2_Y1 + 1 , BTN2_Y2 - 1, boundary_color);
+    drawPixel(BTN2_X2 + 1, BTN2_Y2, boundary_color);
+    drawPixel(BTN2_X2, BTN2_Y2 + 1, boundary_color);
+    drawRectangle(BTN2_X2 + 2, BTN2_X2 + 2, BTN2_Y1 + 1 , BTN2_Y2 - 1, boundary_color);
+    drawPixel(BTN2_X1 - 1, BTN2_Y2, boundary_color);
+    drawPixel(BTN2_X1, BTN2_Y2 + 1, boundary_color);
+
+    //etc...
+    drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y1 - 2 , BTN3_Y1 - 2, boundary_color);
+    drawPixel(BTN3_X1 - 1, BTN3_Y1, boundary_color);
+    drawPixel(BTN3_X1, BTN3_Y1 - 1, boundary_color);
+    drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y2 + 2 , BTN3_Y2 + 2, boundary_color);
+    drawPixel(BTN3_X2 + 1, BTN3_Y1, boundary_color);
+    drawPixel(BTN3_X2, BTN3_Y1 - 1, boundary_color);
+    drawRectangle(BTN3_X1 - 2, BTN3_X1 - 2, BTN3_Y1 + 1 , BTN3_Y2 - 1, boundary_color);
+    drawPixel(BTN3_X2 + 1, BTN3_Y2, boundary_color);
+    drawPixel(BTN3_X2, BTN3_Y2 + 1, boundary_color);
+    drawRectangle(BTN3_X2 + 2, BTN3_X2 + 2, BTN3_Y1 + 1 , BTN3_Y2 - 1, boundary_color);
+    drawPixel(BTN3_X1 - 1, BTN3_Y2, boundary_color);
+    drawPixel(BTN3_X1, BTN3_Y2 + 1, boundary_color);
+
+    drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y1 - 2 , BTN4_Y1 - 2, boundary_color);
+    drawPixel(BTN4_X1 - 1, BTN4_Y1, boundary_color);
+    drawPixel(BTN4_X1, BTN4_Y1 - 1, boundary_color);
+    drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y2 + 2 , BTN4_Y2 + 2, boundary_color);
+    drawPixel(BTN4_X2 + 1, BTN4_Y1, boundary_color);
+    drawPixel(BTN4_X2, BTN4_Y1 - 1, boundary_color);
+    drawRectangle(BTN4_X1 - 2, BTN4_X1 - 2, BTN4_Y1 + 1 , BTN4_Y2 - 1, boundary_color);
+    drawPixel(BTN4_X2 + 1, BTN4_Y2, boundary_color);
+    drawPixel(BTN4_X2, BTN4_Y2 + 1, boundary_color);
+    drawRectangle(BTN4_X2 + 2, BTN4_X2 + 2, BTN4_Y1 + 1 , BTN4_Y2 - 1, boundary_color);
+    drawPixel(BTN4_X1 - 1, BTN4_Y2, boundary_color);
+    drawPixel(BTN4_X1, BTN4_Y2 + 1, boundary_color);
+
+    drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y1 - 2 , BTN5_Y1 - 2, boundary_color);
+    drawPixel(BTN5_X1 - 1, BTN5_Y1, boundary_color);
+    drawPixel(BTN5_X1, BTN5_Y1 - 1, boundary_color);
+    drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y2 + 2 , BTN5_Y2 + 2, boundary_color);
+    drawPixel(BTN5_X2 + 1, BTN5_Y1, boundary_color);
+    drawPixel(BTN5_X2, BTN5_Y1 - 1, boundary_color);
+    drawRectangle(BTN5_X1 - 2, BTN5_X1 - 2, BTN5_Y1 + 1 , BTN5_Y2 - 1, boundary_color);
+    drawPixel(BTN5_X2 + 1, BTN5_Y2, boundary_color);
+    drawPixel(BTN5_X2, BTN5_Y2 + 1, boundary_color);
+    drawRectangle(BTN5_X2 + 2, BTN5_X2 + 2, BTN5_Y1 + 1 , BTN5_Y2 - 1, boundary_color);
+    drawPixel(BTN5_X1 - 1, BTN5_Y2, boundary_color);
+    drawPixel(BTN5_X1, BTN5_Y2 + 1, boundary_color);
+}
+
+void tft_menu_instructions_update(void){
+    static uint8_t instr_state = 0;
+    const uint8_t instr_x = BTN_START_POS_X - ((ONE_CHAR_PIXEL_SPACING*2));
+    const uint8_t instr_y = BTN_START_POS_Y - (2*(ONE_CHAR_PIXEL_SPACING*2)) - 1;
+    const uint16_t instr_color = TFT_GREY;
+
+    instr_state = ((instr_state + 1) % 5);
+    
+
+    if(instr_state == 4){
+        drawString("        ", instr_x - 12, instr_y, instr_color, 0x0000, 2);
+        drawString("Remove  ", instr_x, instr_y, instr_color, 0x0000, 2);
+        drawString("dice   ", instr_x + 10, instr_y + 12, instr_color, 0x0000, 2);
+        drawButtons(BTN5_PIN, instr_color);
+        drawButtons(BTN1_PIN, 0xFFFF);
+    }else if(instr_state == 3){
+        drawString("        ", instr_x - 12, instr_y, instr_color, 0x0000, 2);
+        drawString("Add dice", instr_x - 10, instr_y, instr_color, 0x0000, 2);
+        drawString("          ", instr_x - 24, instr_y + 12, instr_color, 0x0000, 2);
+        drawButtons(BTN1_PIN, instr_color);
+        drawButtons(BTN2_PIN, 0xFFFF);
+    }else if(instr_state == 2){
+        drawString("        ", instr_x + 4, instr_y + 12, instr_color, 0x0000, 2);
+        drawString("        ", instr_x - 3, instr_y, instr_color, 0x0000, 2);
+        drawString("subtract", instr_x - 12, instr_y, instr_color, 0x0000, 2);
+        drawString("from total", instr_x - 24, instr_y + 12, instr_color, 0x0000, 2);
+        drawButtons(BTN2_PIN, instr_color);
+        drawButtons(BTN4_PIN, 0xFFFF);
+    }else if(instr_state == 1){
+        drawString("        ", instr_x + 4, instr_y, instr_color, 0x0000, 2);
+        drawString("   ", instr_x + 14, instr_y + 12, instr_color, 0x0000, 2);
+        drawString("add to  ", instr_x - 3, instr_y, instr_color, 0x0000, 2);
+        drawString("total   ", instr_x + 4, instr_y + 12, instr_color, 0x0000, 2);
+        drawButtons(BTN4_PIN, instr_color);
+        drawButtons(BTN3_PIN, 0xFFFF);
+    }else if(instr_state == 0){
+        drawString("        ", instr_x, instr_y, instr_color, 0x0000, 2);
+        drawString("    ", instr_x + 10, instr_y + 12, instr_color, 0x0000, 2);
+        drawString("Reset   ", instr_x + 4, instr_y, instr_color, 0x0000, 2);
+        drawString("all  ", instr_x + 14, instr_y + 12, instr_color, 0x0000, 2);
+        drawButtons(BTN3_PIN, instr_color);
+        drawButtons(BTN5_PIN, 0xFFFF);
+    }
 }
 
 //Handles all of the flags that other modules set when they want something
 //  changed or put on the tft display
 void TFTDisplayTask(void){
+    const uint8_t numDice_x = BOX_X1 + 1;
+    const uint8_t numDice_y = BOX_Y1 + 2;
+
+    const uint8_t plusMinus_x = numDice_x + 11;
+    const uint8_t plusMinus_y = numDice_y + 12;
+
+    const uint8_t total_x = BOX_X1;
+    const uint8_t total_y = BOX_Y1 - (5*(ONE_CHAR_PIXEL_SPACING*2));
+
+    const uint8_t randnum_x_start = 2;
+    const uint8_t randnum_y_start = 15;
+
+    const uint8_t numsides_x = randnum_x_start;
+    const uint8_t numsides_y = randnum_y_start - 12; 
+
     uint8_t string[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\0'};
     uint8_t magnitude = 0;
     static bool negative_PlusMinusFlag = false;
-    int32_t sum;
     uint8_t randnum;
     uint8_t modnum;
     uint8_t randnum_x;
     uint8_t randnum_y;
+    
+    int32_t sum;
+    static uint8_t invert_flag = 0;
     static uint32_t count = 0;
+    static uint32_t instructions_pause_count = 0;
     static struct button_struct button[5] = {0};
 
     //Initialize button struct
@@ -258,39 +370,61 @@ void TFTDisplayTask(void){
     //Cursor update
     idleUpdate(count, 0xFFFF);
 
-    //Initial old-task cleanup
-    
-    
+    if((Button_Flag != 0) || (RFID_Flag)){
+        instructions_pause_count = count + 1000;
+    }
+
+    //instructions update
+    if((instructions_pause_count < count) && ((count % 300) == 0)){
+        tft_menu_instructions_update();
+    }else if(instructions_pause_count == count + 1000){
+        //Clear the instructions from the screen
+        drawRectangle(2, WIDTH - 2, 85, 97 + 10, 0x0000);
+        for(uint8_t i = 0; i <= 4; i++){
+            drawButtons(button[i].number, 0xFFFF);
+        }
+    }
+
+    //Button color change check
+    for(uint8_t i = 0; i <= 4; i++){
+        if(button[i].count != 0){
+            //A button is green for a bit
+            if(button[i].count <= count){
+                button[i].count = 0;
+                button[i].color = 0xFFFF;
+                drawButtons(button[i].number, button[i].color);
+            }
+        }
+    }
 
     //Time to check all the flags
     //Button check
     if(Button_Flag != 0){
-        numToString(Button_Flag, string, getMagnitude(Button_Flag) + 2);
-        drawString(string, (4*6), 95, 0xFFFF, 0x0000, 2);
-        if(count > 500){
-            while(1){}
-        }
     
         for(uint8_t i = 0; i <= 4; i++){
             if(Button_Flag == button[i].number){
-                //drawString("AAAHH", (4*6), 95, 0xFFFF, 0x0000, 1);
-                button[i].count = count + 250;
-                button[i].color = 0x0F0F;
+                //numToString(Button_Flag, string, getMagnitude(Button_Flag) + 2);
+                //drawString(string, (4*6), 95, 0xFFFF, 0x0000, 2);
+                button[i].count = count + 5;
+                button[i].color = 0x0f0f;
+                drawButtons(button[i].number, button[i].color);
             }
         }
-        
-        if(Button_Flag == BTN5_PIN){
-            tft_menu_print();        
+
+        numToString(NumberOfDice, string, getMagnitude(NumberOfDice) + 2);
+        drawString("  ", numDice_x, numDice_y, 0xFFFF, 0x0000, 2);
+        drawString("d", numDice_x + 21, numDice_y, 0xFFFF, 0x0000, 2);
+        if(NumberOfDice == 1){
+            drawString("ie ", numDice_x + 21 + 10, numDice_y + 3, 0xFFFF, 0x0000, 1);
+        }else{
+            drawString("ice", numDice_x + 21 + 10, numDice_y + 3, 0xFFFF, 0x0000, 1);
         }
 
-        //TODO make it so drawButtons draws a Button in a different color when I want
-        //drawButtons(Button_Flag, 0x0F0F);
-
-        /*
-        numToString(NumberOfDice, string, getMagnitude(NumberOfDice) + 2);
-        drawString("  ", (16*6), 89, 0xFFFF, 0x0000, 1);
-        drawString(string, (16*6), 89, 0xFFFF, 0x0000, 1);
-        */
+        if(NumberOfDice > 9){
+            drawString(string, numDice_x, numDice_y, 0xFFFF, 0x0000, 2);
+        }else{
+            drawString(string, numDice_x + 11, numDice_y, 0xFFFF, 0x0000, 2);
+        }
 
         //PlusMinus can be negative so flipping to positive if necesary
         if(PlusMinus < 0){
@@ -299,34 +433,43 @@ void TFTDisplayTask(void){
         }else{
             negative_PlusMinusFlag = false;
         }
-        /*
+
         numToString((uint16_t)PlusMinus, string, getMagnitude(PlusMinus) + 2);
-        drawString("    ", (4*6), 95, 0xFFFF, 0x0000, 1);
-        */
+        drawString("   ", plusMinus_x - 11, plusMinus_y, 0xFFFF, 0x0000, 2);
+
         if(negative_PlusMinusFlag == true){ 
             PlusMinus = -PlusMinus;
-            //drawString("-", (5*6), 95, 0xFFFF, 0x0000, 1);
-            //drawString(string, (6*6), 95, 0xFFFF, 0x0000, 1);
+            drawString("-", plusMinus_x - 11, plusMinus_y, 0xFFFF, 0x0000, 2);
+            drawString(string, plusMinus_x, plusMinus_y, 0xFFFF, 0x0000, 2);
         }else{
-            //drawString(string, (5*6), 95, 0xFFFF, 0x0000, 1);
+            drawString("+", plusMinus_x - 11, plusMinus_y, 0xFFFF, 0x0000, 2);
+            drawString(string, plusMinus_x, plusMinus_y, 0xFFFF, 0x0000, 2);
         }
 
         Button_Flag = 0;
 
     //ADC check
     }else if(ADC_Flag != 0){
+
         switch(Batt_State){
         case(BATT_FULL):
-            drawString("Battery full", 50, 5, 0xFFFF, 0x0000, 1);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y2, TFT_BRIGHT_GREEN);
+            //drawString("Battery full", 50, 5, 0xFFFF, 0x0000, 1);
         break;
         case(BATT_MED):
-            drawString("Battery okay", 50, 5, 0xFFFF, 0x0000, 1);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y2, TFT_BRIGHT_GREEN);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y1 + 2, TFT_BLACK);
+            //drawString("Battery okay", 50, 5, 0xFFFF, 0x0000, 1);
         break;
         case(BATT_LOW):
-            drawString("Battery low ", 50, 5, 0xFFFF, 0x0000, 1);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y2, TFT_BRIGHT_GREEN);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y1 + 4, TFT_BLACK);
+            //drawString("Battery low ", 50, 5, 0xFFFF, 0x0000, 1);
         break;
         case(BATT_DYING):
-            drawString("Battery dead", 50, 5, 0xFFFF, 0x0000, 1);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y2, TFT_BRIGHT_GREEN);
+            drawRectangle(BATT_X1, BATT_X2, BATT_Y1, BATT_Y1 + 8, TFT_BLACK);
+            //drawString("Battery dead", 50, 5, 0xFFFF, 0x0000, 1);
         break;
         default:
         break;
@@ -334,14 +477,13 @@ void TFTDisplayTask(void){
         ADC_Flag = 0;
     //RFID check
     }else if(RFID_Flag != 0){
-        
-
-
-        randnum_x = 5;
-        randnum_y = 65;
+        randnum_x = randnum_x_start;
+        randnum_y = randnum_y_start;
         sum = 0;
-        drawString("                     ", 5, 65, 0xFFFF, 0x0000, 1);
-        drawString("                     ", 5, 71, 0xFFFF, 0x0000, 1);
+
+        drawString("        ", randnum_x, randnum_y, 0xFFFF, 0x0000, 2);
+        drawString("                    ", randnum_x, randnum_y, 0xFFFF, 0x0000, 1);
+        drawString("                    ", randnum_x, randnum_y + 6, 0xFFFF, 0x0000, 1);
         for(uint8_t i = 0; i < NumberOfDice; i++){
             switch(Current_Die){
             case D4UID:
@@ -374,7 +516,11 @@ void TFTDisplayTask(void){
             sum+= randnum;
             numToString(randnum, string, getMagnitude(randnum) + 2);
 
-            drawString(string, randnum_x, randnum_y, 0xFFFF, 0x0000, 1);
+            if(NumberOfDice == 1){
+                drawString(string, randnum_x, randnum_y, 0xFFFF, 0x0000, 2);
+            }else{
+                drawString(string, randnum_x, randnum_y, 0xFFFF, 0x0000, 1);
+            }
 
             //Adjust screen position for next random number based on magnitude of number
             if(randnum < 10){
@@ -388,33 +534,35 @@ void TFTDisplayTask(void){
 
             //Check if the number is going to run off the screen
             if((randnum_x + 24) > (WIDTH)){
-                randnum_x = 5;
+                randnum_x = randnum_x_start;
                 randnum_y += 6;
             }
         }
 
         //Displaing the sum (If we care about it)
         sum += PlusMinus;
+        drawRectangle(total_x, total_x + (10*12), total_y, total_y + 12, 0x0000);
         if((NumberOfDice > 1) || (PlusMinus != 0)){
-            drawString("Sum is              ", 5, 77, 0xFFFF, 0x0000, 1);
+            drawString("Total:", total_x, total_y, 0xFFFF, 0x0000, 2);
             //Negative check
             if(sum >= 0){
                 numToString(sum, string, getMagnitude(sum) + 2);
-                drawString(string, (8*6), 77, 0xFFFF, 0x0000, 1);
+                drawString(string, total_x + (6*12), total_y, 0xFFFF, 0x0000, 2);
             }else{ //Negative
                 sum = -sum;
                 numToString((uint16_t)sum, string, getMagnitude(sum) + 2);
                 
-                drawString("-", (8*6), 77, 0xFFFF, 0x0000, 1);
-                drawString(string, (9*6), 77, 0xFFFF, 0x0000, 1);
+                drawString("-", total_x + (6*12), total_y, 0xFFFF, 0x0000, 2);
+                drawString(string, total_x + (7*12), total_y, 0xFFFF, 0x0000, 2);
             }
         }else{
-            drawString("                    ", 5, 77, 0xFFFF, 0x0000, 1);
+            drawRectangle(total_x, total_x + (10*12), total_y, total_y + 12, 0x0000);
+           //drawString("           ", total_x, total_y, 0xFFFF, 0x0000, 2);
         }
 
-        drawString("D   ", 5, 59, 0xFFFF, 0x0000, 1);
+        drawString("D   ", numsides_x, numsides_y, 0xFFFF, 0x0000, 2);
         numToString(modnum, string, getMagnitude(modnum) + 2);
-        drawString(string, 11, 59, 0xFFFF, 0x0000, 1);
+        drawString(string, numsides_x + 12, numsides_y, 0xFFFF, 0x0000, 2);
         RFID_Flag = 0;
     }else{}
 
@@ -528,44 +676,44 @@ void drawButtons(uint8_t button_num, uint16_t clr){
     //BTN1
     switch(button_num){
         case(BTN1_PIN):
-            drawRectangle(BTN1_X1, BTN1_X2, BTN1_Y1, BTN1_Y2, 0xFFFF);
-            drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y1 - 1 , BTN1_Y1 - 1, 0xFFFF);
-            drawRectangle(BTN1_X1 - 1, BTN1_X1 - 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN1_X2 + 1, BTN1_X2 + 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y2 + 1 , BTN1_Y2 + 1, 0xFFFF);
+            drawRectangle(BTN1_X1, BTN1_X2, BTN1_Y1, BTN1_Y2, clr);
+            drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y1 - 1 , BTN1_Y1 - 1, clr);
+            drawRectangle(BTN1_X1 - 1, BTN1_X1 - 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, clr);
+            drawRectangle(BTN1_X2 + 1, BTN1_X2 + 1, BTN1_Y1 + 1 , BTN1_Y2 - 1, clr);
+            drawRectangle(BTN1_X1 + 1, BTN1_X2 - 1, BTN1_Y2 + 1 , BTN1_Y2 + 1, clr);
             //Up
             break;
         case(BTN2_PIN):
             //Left
-            drawRectangle(BTN2_X1, BTN2_X2, BTN2_Y1, BTN2_Y2, 0xFFFF);
-            drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y1 - 1 , BTN2_Y1 - 1, 0xFFFF);
-            drawRectangle(BTN2_X1 - 1, BTN2_X1 - 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN2_X2 + 1, BTN2_X2 + 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y2 + 1 , BTN2_Y2 + 1, 0xFFFF);
+            drawRectangle(BTN2_X1, BTN2_X2, BTN2_Y1, BTN2_Y2, clr);
+            drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y1 - 1 , BTN2_Y1 - 1, clr);
+            drawRectangle(BTN2_X1 - 1, BTN2_X1 - 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, clr);
+            drawRectangle(BTN2_X2 + 1, BTN2_X2 + 1, BTN2_Y1 + 1 , BTN2_Y2 - 1, clr);
+            drawRectangle(BTN2_X1 + 1, BTN2_X2 - 1, BTN2_Y2 + 1 , BTN2_Y2 + 1, clr);
             break;
-        case(BTN3_PIN):
+        case(BTN5_PIN):
             //Down
-            drawRectangle(BTN5_X1, BTN5_X2, BTN5_Y1, BTN5_Y2, 0xFFFF);
-            drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y1 - 1 , BTN5_Y1 - 1, 0xFFFF);
-            drawRectangle(BTN5_X1 - 1, BTN5_X1 - 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN5_X2 + 1, BTN5_X2 + 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y2 + 1 , BTN5_Y2 + 1, 0xFFFF);
+            drawRectangle(BTN5_X1, BTN5_X2, BTN5_Y1, BTN5_Y2, clr);
+            drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y1 - 1 , BTN5_Y1 - 1, clr);
+            drawRectangle(BTN5_X1 - 1, BTN5_X1 - 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, clr);
+            drawRectangle(BTN5_X2 + 1, BTN5_X2 + 1, BTN5_Y1 + 1 , BTN5_Y2 - 1, clr);
+            drawRectangle(BTN5_X1 + 1, BTN5_X2 - 1, BTN5_Y2 + 1 , BTN5_Y2 + 1, clr);
             break;
         case(BTN4_PIN):
             //Right
-            drawRectangle(BTN4_X1, BTN4_X2, BTN4_Y1, BTN4_Y2, 0xFFFF);
-            drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y1 - 1 , BTN4_Y1 - 1, 0xFFFF);
-            drawRectangle(BTN4_X1 - 1, BTN4_X1 - 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN4_X2 + 1, BTN4_X2 + 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y2 + 1 , BTN4_Y2 + 1, 0xFFFF);
+            drawRectangle(BTN4_X1, BTN4_X2, BTN4_Y1, BTN4_Y2, clr);
+            drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y1 - 1 , BTN4_Y1 - 1, clr);
+            drawRectangle(BTN4_X1 - 1, BTN4_X1 - 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, clr);
+            drawRectangle(BTN4_X2 + 1, BTN4_X2 + 1, BTN4_Y1 + 1 , BTN4_Y2 - 1, clr);
+            drawRectangle(BTN4_X1 + 1, BTN4_X2 - 1, BTN4_Y2 + 1 , BTN4_Y2 + 1, clr);
             break;
-        case(BTN5_PIN):
+        case(BTN3_PIN):
             //Lowest Right button
-            drawRectangle(BTN3_X1, BTN3_X2, BTN3_Y1, BTN3_Y2, 0xFFFF);
-            drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y1 - 1 , BTN3_Y1 - 1, 0xFFFF);
-            drawRectangle(BTN3_X1 - 1, BTN3_X1 - 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN3_X2 + 1, BTN3_X2 + 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, 0xFFFF);
-            drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y2 + 1 , BTN3_Y2 + 1, 0xFFFF);
+            drawRectangle(BTN3_X1, BTN3_X2, BTN3_Y1, BTN3_Y2, clr);
+            drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y1 - 1 , BTN3_Y1 - 1, clr);
+            drawRectangle(BTN3_X1 - 1, BTN3_X1 - 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, clr);
+            drawRectangle(BTN3_X2 + 1, BTN3_X2 + 1, BTN3_Y1 + 1 , BTN3_Y2 - 1, clr);
+            drawRectangle(BTN3_X1 + 1, BTN3_X2 - 1, BTN3_Y2 + 1 , BTN3_Y2 + 1, clr);
             break;
         default:
             break;
@@ -890,6 +1038,12 @@ uint32_t decodeToPixelMap(uint8_t ch){
             break;
         case '-':
             ret = l_hyphen;
+            break;
+        case '+':
+            ret = l_plus;
+            break;
+        case ':':
+            ret = l_colon;
             break;
         default:
             ret = l_not_a_letter;

@@ -69,11 +69,12 @@ void Rand_Task(void){
                 PlusMinus--;
             }else{}
             break;
-        case(BTN3_PIN):
+        case(BTN5_PIN):
             //Down
-            if(NumberOfDice >= 1){
+            if(NumberOfDice > 1){
                 NumberOfDice--;
             }else{}
+
             break;
         case(BTN4_PIN):
             //Right
@@ -81,7 +82,9 @@ void Rand_Task(void){
                 PlusMinus++;
             }else{}
             break;
-        case(BTN5_PIN):
+        case(BTN3_PIN):
+                 PlusMinus = 0;
+                 NumberOfDice = 1;
                 //Middle Button
             break;
         default:

@@ -1,6 +1,6 @@
 //Arbitrary Battery values measured by the ADC
-#define BATT_FULL_VAL 2720
-#define BATT_MED_VAL 2600
+#define BATT_FULL_VAL 2700
+#define BATT_MED_VAL 2520
 #define BATT_LOW_VAL 2490
 
 //For my project(RFIDiceBoard) 2820 and above is 4.2 volts

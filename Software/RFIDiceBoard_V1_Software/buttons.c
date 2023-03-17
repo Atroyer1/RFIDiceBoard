@@ -52,6 +52,7 @@ void Button_Task(void){
             //converting btn_flags from one-hot to the number of the button
             //  Cancels the for loop on the first button to be detected
             //  with buttons having priority of 1,2,3, etc. 
+
             
             for(uint8_t i = 22; i <= 27; i++){
                 if(((btn_flags >> i) & 1) == 0b1){
